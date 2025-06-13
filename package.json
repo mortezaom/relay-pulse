@@ -1,0 +1,34 @@
+{
+  "name": "example-hackernews",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start"
+  },
+  "dependencies": {
+    "@kobalte/core": "^0.13.9",
+    "@solid-primitives/refs": "^1.1.1",
+    "@solidjs/router": "^0.15.0",
+    "@solidjs/start": "^1.1.0",
+    "autoprefixer": "^10.4.21",
+    "chart.js": "^4.4.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "postcss": "^8.5.3",
+    "solid-js": "^1.9.5",
+    "solid-sonner": "^0.2.8",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vinxi": "^0.5.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "tailwindcss": "3"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ]
+}
