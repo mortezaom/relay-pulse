@@ -144,13 +144,6 @@ body {
 	display: none;
 }
 
-.max-width-con {
-	width: 100%;
-	max-width: 60rem !important;
-	padding-left: 2rem;
-	padding-right: 2rem;
-}
-
 .dark-image {
 	-webkit-filter: invert(100%);
 	filter: invert(100%);

@@ -5,10 +5,10 @@ import { Callout, CalloutTitle } from "~/components/ui/callout";
 
 export default () => {
 	return (
-		<main>
-			<div class="flex flex-col items-center">
-				<MainNav class="flex justify-between items-center px-4 border-b h-16 max-width-con" />
-				<div class="flex-1 space-y-4 pt-6 max-width-con">
+		<main class="container">
+			<div class="flex flex-col items-stretch">
+				<MainNav class="flex justify-between items-center px-4 border-b h-16" />
+				<div class="flex-1 space-y-4 pt-6">
 					<Callout variant="success" class="p-4">
 						<CalloutTitle class="font-bold text-sm">
 							All Services Operational!
@@ -55,7 +55,7 @@ export default () => {
 						/>
 					</div>
 				</div>
-				<div class="flex flex-col gap-4 mt-8 mb-4 w-full max-width-con">
+				<div class="flex flex-col gap-4 mt-8 mb-4">
 					<h3>All Services:</h3>
 					<StatItem
 						title="Stats Server"
