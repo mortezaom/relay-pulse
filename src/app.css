@@ -56,7 +56,7 @@ body {
 
 	.dark,
 	[data-kb-theme="dark"] {
-		--background: 240 10% 3.9%;
+		--background: 240 0% 0%;
 		--foreground: 0 0% 98%;
 
 		--muted: 240 3.7% 15.9%;
@@ -86,8 +86,8 @@ body {
 		--info: 204 94% 94%;
 		--info-foreground: 199 89% 48%;
 
-		--success: 164.79, 100%, 31.94%;
-		--success-foreground: 165.29, 100%, 14.85%;
+		--success: 142, 71%, 45%;
+		--success-foreground: 240 3.7% 15.9%;
 
 		--warning: 48 96% 89%;
 		--warning-foreground: 25 95% 53%;
@@ -117,8 +117,8 @@ body {
 	}
 
 	.step:before {
-		@apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
-		@apply ml-[-50px] mt-[-4px];
+		@apply inline-flex absolute justify-center items-center bg-muted border-4 border-background rounded-full w-9 h-9 font-mono font-medium text-base text-center -indent-px;
+		@apply mt-[-4px] ml-[-50px];
 		content: counter(step);
 	}
 }
@@ -146,7 +146,7 @@ body {
 
 .max-width-con {
 	width: 100%;
-	max-width: 1100px !important;
+	max-width: 60rem !important;
 	padding-left: 2rem;
 	padding-right: 2rem;
 }

@@ -1,0 +1,14 @@
+name = "relay-pulse-worker"
+main = "workers/main.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = [ "nodejs_compat" ]
+
+# Enable KV for local dev
+[[kv_namespaces]]
+binding = "RELAY_PULSE_KV"
+id = "relay-kv-id"
+preview_id = "relay-kv-preview-id"
+
+# Enable cron trigger for local testing
+[triggers]
+crons = ["* * * * *"] # every minute
