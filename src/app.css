@@ -107,7 +107,9 @@ body {
 	}
 	body {
 		@apply bg-background text-foreground;
-		font-feature-settings: "rlig" 1, "calt" 1;
+		font-feature-settings:
+			"rlig" 1,
+			"calt" 1;
 	}
 }
 
@@ -144,7 +146,7 @@ body {
 	display: none;
 }
 
-.dark-image {
-	-webkit-filter: invert(100%);
-	filter: invert(100%);
+.hide-first::first-letter {
+	visibility: hidden;
+	font-size: 0px;
 }

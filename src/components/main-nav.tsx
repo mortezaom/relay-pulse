@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 
 import { cn } from "~/lib/utils";
-import { IconMoon, IconSun } from "./icons";
+import { IconMoon, IconSun, LogoVector } from "./icons";
 
 export function MainNav(props: ComponentProps<"nav">) {
 	const [, rest] = splitProps(props, ["class"]);
@@ -39,25 +39,20 @@ export function MainNav(props: ComponentProps<"nav">) {
 	return (
 		<nav class={cn("flex items-center justify-between", props.class)} {...rest}>
 			<div class="flex items-center space-x-4 lg:space-x-6">
-				<a href="/" class="ml-[-1.1rem] size-12">
-					<img
-						src="/img/logo.webp"
-						class="cursor-pointer size-12"
-						classList={{ "dark-image": darkMode() }}
-						alt=""
-					/>
+				<a href="/" class="flex justify-center items-center ml-[-1.1rem] size-12">
+					<LogoVector class="size-8" />
 				</a>
 
 				<a
 					href="/examples/dashboard"
-					class="text-sm font-medium transition-colors hover:text-primary"
+					class="font-medium hover:text-primary text-sm transition-colors"
 				>
 					Overview
 				</a>
 			</div>
 
 			{/* <UserNav /> */}
-			<div class="flex items-center justify-end gap-2">
+			<div class="flex justify-end items-center gap-2">
 				<button type="button" onClick={() => setDarkMode(!darkMode())}>
 					<Show when={darkMode()}>
 						<IconMoon size={20} />
