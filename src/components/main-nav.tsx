@@ -1,36 +1,20 @@
 "use client";
 
 import { MoonIcon, SunIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { LogoVector } from "./icons";
 
 export function MainNav(props: { className?: string }) {
-	const [darkMode, setDarkMode] = useState(false);
-
-	useEffect(() => {
-		const darkStorage = localStorage.getItem("dark-mode");
-		if (!darkStorage) {
-			setDarkMode(true);
-		} else if (`${darkStorage}` === "true") {
-			setDarkMode(true);
-		} else {
-			setDarkMode(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		if (darkMode) {
-			document.body.classList.add("dark");
-			localStorage.setItem("dark-mode", "true");
-		} else {
-			document.body.classList.remove("dark");
-			localStorage.setItem("dark-mode", "false");
-		}
-	}, [darkMode]);
+	const { setTheme, theme } = useTheme();
 
 	return (
-		<nav className={cn("flex items-center justify-between", props.className)}>
+		<nav
+			className={cn(
+				"flex items-center justify-between",
+				props.className,
+			)}
+		>
 			<div className="flex items-center space-x-4 lg:space-x-6">
 				<a
 					href="/"
@@ -51,12 +35,14 @@ export function MainNav(props: { className?: string }) {
 				<button
 					className="cursor-pointer"
 					type="button"
-					onClick={() => setDarkMode(!darkMode)}
+					onClick={() =>
+						setTheme(theme === "dark" ? "light" : "dark")
+					}
 				>
-					{darkMode ? (
-						<SunIcon className="size-5" />
-					) : (
+					{theme === "light" ? (
 						<MoonIcon className="size-5" />
+					) : (
+						<SunIcon className="size-5" />
 					)}
 				</button>
 			</div>

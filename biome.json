@@ -11,7 +11,10 @@
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"bracketSpacing": true
+		"bracketSpacing": true,
+		"indentWidth": 4,
+		"lineWidth": 75,
+		"formatWithErrors": true
 	},
 	"linter": {
 		"enabled": true,

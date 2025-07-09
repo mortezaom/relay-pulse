@@ -45,7 +45,9 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 					{lines.slice(0, 25).map((item, i) => (
 						<li
 							key={`l-${i}`}
-							onMouseEnter={() => handleMouseEnter(item.message)}
+							onMouseEnter={() =>
+								handleMouseEnter(item.message)
+							}
 							onMouseLeave={handleMouseLeave}
 							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
@@ -55,7 +57,9 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 					{lines.slice(25).map((item, i) => (
 						<li
 							key={`l-${i}-25`}
-							onMouseEnter={() => handleMouseEnter(item.message)}
+							onMouseEnter={() =>
+								handleMouseEnter(item.message)
+							}
 							onMouseLeave={handleMouseLeave}
 							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
@@ -94,7 +98,9 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 	);
 };
 
-export const PulseLineCardContent = ({ arrayOfLines }: PCardContentProps) => {
+export const PulseLineCardContent = ({
+	arrayOfLines,
+}: PCardContentProps) => {
 	const defaultLines = Array.from({ length: 50 }).map((_, i) => ({
 		value: 100,
 		message: `Line ${i + 1}`,
@@ -126,7 +132,9 @@ export const PulseLineCardContent = ({ arrayOfLines }: PCardContentProps) => {
 					{lines.slice(0, 25).map((item, i) => (
 						<li
 							key={`l-${i}`}
-							onMouseEnter={() => handleMouseEnter(item.message)}
+							onMouseEnter={() =>
+								handleMouseEnter(item.message)
+							}
 							onMouseLeave={handleMouseLeave}
 							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
@@ -136,7 +144,9 @@ export const PulseLineCardContent = ({ arrayOfLines }: PCardContentProps) => {
 					{lines.slice(25).map((item, i) => (
 						<li
 							key={`l-${i}-25`}
-							onMouseEnter={() => handleMouseEnter(item.message)}
+							onMouseEnter={() =>
+								handleMouseEnter(item.message)
+							}
 							onMouseLeave={handleMouseLeave}
 							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>

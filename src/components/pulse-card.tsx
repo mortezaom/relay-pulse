@@ -4,7 +4,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { PulseCardContent, PulseLineCardContent } from "./pulse-card-content";
+import {
+	PulseCardContent,
+	PulseLineCardContent,
+} from "./pulse-card-content";
 
 export const PinnedPulseCard = ({
 	title,
@@ -19,11 +22,17 @@ export const PinnedPulseCard = ({
 		<Card className="flex flex-col justify-between items-stretch">
 			<CardHeader className="flex flex-col items-stretch w-full">
 				<div className="flex justify-between items-center w-full">
-					<CardTitle className="font-medium text-sm">{title}</CardTitle>
+					<CardTitle className="font-medium text-sm">
+						{title}
+					</CardTitle>
 					{icon}
 				</div>
 				<CardDescription>
-					<a className="font-bold text-xs underline" href={link}>
+					<a
+						className="font-bold text-xs underline"
+						href={link}
+						target="_blank"
+					>
 						{link}
 					</a>
 				</CardDescription>

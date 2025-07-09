@@ -21,7 +21,7 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		},
-		"types": ["./cloudflare-env.d.ts", "./worker-configuration.d.ts", "node"]
+		"types": ["./worker-configuration.d.ts", "node"]
 	},
 	"include": [
 		"worker-configuration.d.ts",
