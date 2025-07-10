@@ -1,13 +1,8 @@
-"use client";
-
-import { MoonIcon, SunIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { LogoVector } from "./icons";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function MainNav(props: { className?: string }) {
-	const { setTheme, theme } = useTheme();
-
 	return (
 		<nav
 			className={cn(
@@ -32,19 +27,7 @@ export function MainNav(props: { className?: string }) {
 			</div>
 
 			<div className="flex justify-end items-center gap-2">
-				<button
-					className="cursor-pointer"
-					type="button"
-					onClick={() =>
-						setTheme(theme === "dark" ? "light" : "dark")
-					}
-				>
-					{theme === "light" ? (
-						<MoonIcon className="size-5" />
-					) : (
-						<SunIcon className="size-5" />
-					)}
-				</button>
+				<ThemeSwitcher />
 			</div>
 		</nav>
 	);

@@ -5,7 +5,8 @@
 		"includes": [
 			"**",
 			"!**/dist/**",
-			"!node_modules/**"
+			"!node_modules/**",
+			"!src/components/ui/**"
 		]
 	},
 	"formatter": {
@@ -15,6 +16,13 @@
 		"indentWidth": 4,
 		"lineWidth": 75,
 		"formatWithErrors": true
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
 	},
 	"linter": {
 		"enabled": true,
