@@ -24,6 +24,7 @@
 		"motion": "^12.23.0",
 		"next": "15.3.5",
 		"next-themes": "^0.4.6",
+		"radix-ui": "^1.4.2",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
 		"react-hook-form": "^7.60.0",
@@ -41,5 +42,5 @@
 		"typescript": "^5",
 		"wrangler": "^4.24.0"
 	},
-	"packageManager": "pnpm@10.12.4"
+	"packageManager": "pnpm@10.13.1"
 }

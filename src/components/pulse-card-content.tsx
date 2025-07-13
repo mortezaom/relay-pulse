@@ -49,7 +49,7 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 								handleMouseEnter(item.message)
 							}
 							onMouseLeave={handleMouseLeave}
-							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
+							className="bg-primary hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
 					))}
 				</ul>
@@ -61,7 +61,7 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 								handleMouseEnter(item.message)
 							}
 							onMouseLeave={handleMouseLeave}
-							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
+							className="bg-primary hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
 					))}
 				</ul>
@@ -75,7 +75,7 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -3 }}
 							transition={{ duration: 0.15 }}
-							className="flex justify-between items-center w-full text-green-500"
+							className="flex justify-between items-center w-full text-primary"
 						>
 							<span>{message}</span>
 						</motion.div>
@@ -136,7 +136,7 @@ export const PulseLineCardContent = ({
 								handleMouseEnter(item.message)
 							}
 							onMouseLeave={handleMouseLeave}
-							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
+							className="bg-primary hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
 					))}
 				</ul>
@@ -148,7 +148,7 @@ export const PulseLineCardContent = ({
 								handleMouseEnter(item.message)
 							}
 							onMouseLeave={handleMouseLeave}
-							className="bg-green-500 hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
+							className="bg-primary hover:opacity-80 rounded-sm w-full transition-opacity cursor-pointer"
 						/>
 					))}
 				</ul>
@@ -162,7 +162,7 @@ export const PulseLineCardContent = ({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -3 }}
 							transition={{ duration: 0.15 }}
-							className="flex justify-between items-center w-full text-green-500"
+							className="flex justify-between items-center w-full text-primary"
 						>
 							<span>{message}</span>
 						</motion.div>

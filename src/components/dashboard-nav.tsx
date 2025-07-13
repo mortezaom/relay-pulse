@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 import { LogoVector } from "./icons";
 import { ThemeSwitcher } from "./theme-switcher";
 
-export function MainNav(props: { className?: string }) {
+export const DashboardNav = (props: { className?: string }) => {
 	return (
 		<nav
 			className={cn(
-				"flex justify-between items-center px-2",
+				"flex items-center justify-between",
 				props.className,
 			)}
 		>
@@ -17,11 +17,18 @@ export function MainNav(props: { className?: string }) {
 				>
 					<LogoVector className="size-6" />
 				</a>
+
+				<a
+					href="/dashboard"
+					className="font-medium hover:text-primary text-sm transition-colors"
+				>
+					Dashboard
+				</a>
 			</div>
 
-			<div className="flex justify-end items-center gap-2">
+			<div className="flex justify-end items-center">
 				<ThemeSwitcher />
 			</div>
 		</nav>
 	);
-}
+};
