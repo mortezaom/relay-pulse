@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod/v4-mini";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import BrandingFileUpload from "./branding-file-upload";
+import type { BrandingDataType } from "@/data/branding-data";
+import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
+
+type BrandingFormProps = {
+  data: BrandingDataType | null
+}
 
 const formSchema = z.object({
   title: z.string().check(z.trim(), z.minLength(2)),
@@ -23,19 +31,54 @@ const formSchema = z.object({
   alertText: z.string().check(z.trim(), z.minLength(2)),
 });
 
-export function BrandingForm() {
+export function BrandingForm({ data }: BrandingFormProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const [bLoading, setBLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "Relay Pulse",
-      description: "Status Checker Page base on Relay Pulse!",
-      alertText: "All Services are Operational!",
-    },
+      title: data?.title || "Relay Pulse",
+      description: data?.description || "Status Checker Page base on Relay Pulse!",
+      alertText: data?.alert || "All Services are Operational!",
+    }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setBLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("title", values.title);
+      formData.append("description", values.description);
+      formData.append("alert", values.alertText);
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      const response = await fetch("/api/branding", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const body: { message?: string } = await response.json();
+        const errorText = body?.message || "Failed to submit branding data";
+
+        toast.error(errorText);
+        setBLoading(false);
+        return;
+      }
+
+      toast.success("Branding data submitted successfully!");
+      setBLoading(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit branding data");
+      setBLoading(false);
+    }
   }
+
   return (
     <Form {...form}>
       <form
@@ -73,14 +116,17 @@ export function BrandingForm() {
                 </FormItem>
               )}
             />
-            <BrandingFileUpload />
+            <BrandingFileUpload
+              currentImage={data?.imageUrl ?? null}
+              onFileChangeAction={(file: File | null) => setSelectedFile(file)}
+            />
           </div>
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Description (SEO)</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Description for Search Engines"
@@ -94,7 +140,8 @@ export function BrandingForm() {
           />
         </div>
         <div className="flex justify-start">
-          <Button type="submit" variant="outline" className="px-10 py-5">
+          <Button type="submit" disabled={bLoading} variant="outline" className="w-full flex items-center px-10 py-5">
+            {bLoading && <Loader2Icon className="animate-spin" />}
             Submit
           </Button>
         </div>

@@ -1,6 +1,8 @@
-import { DashboardDataType } from "./dashboard-data";
+import type { BrandingDataType } from "./branding-data";
 
 export const KV_DASHBOARD_KEY = "data:dashboard-data";
+
+const BRANDING_CACHE: Map<string, BrandingDataType> = new Map();
 
 export const saveFileToBucket = async (
   env: CloudflareEnv,
@@ -23,18 +25,26 @@ export const saveFileToBucket = async (
   return r2Object.key;
 };
 
-export const saveDashboardData = async (
+export const saveBrandingData = async (
   env: CloudflareEnv,
-  data: DashboardDataType,
+  data: BrandingDataType,
 ) => {
   const rKV = env.RELAY_PULSE_KV;
   await rKV.put(KV_DASHBOARD_KEY, JSON.stringify(data));
+
+  BRANDING_CACHE.set("branding", data);
+
   return data;
 };
 
-export const getDashboardData = async (
+export const getBrandingData = async (
   env: CloudflareEnv,
-): Promise<DashboardDataType | null> => {
+): Promise<BrandingDataType | null> => {
+
+  if (BRANDING_CACHE.has("branding")) {
+    return BRANDING_CACHE.get("branding") ?? null;
+  }
+
   const rKV = env.RELAY_PULSE_KV;
   const kvData = await rKV.get(KV_DASHBOARD_KEY);
 
@@ -42,13 +52,15 @@ export const getDashboardData = async (
 
   try {
     const parsedData = JSON.parse(kvData);
-    return parsedData as DashboardDataType;
-  } catch (error) {
-    console.error("Failed to parse dashboard data:", error);
+
+    BRANDING_CACHE.set("branding", parsedData);
+
+    return parsedData as BrandingDataType;
+  } catch {
     return null;
   }
 };
 
 export const convertFileKeyToUrl = (key: string) => {
-  return `/r2/${key}`;
+  return `/r2?key=${key}`;
 };

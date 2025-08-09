@@ -3,8 +3,15 @@
 import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { useEffect } from "react";
 
-export default function BrandingFileUpload() {
+export default function BrandingFileUpload({
+  currentImage,
+  onFileChangeAction,
+}: {
+  currentImage: string | null;
+  onFileChangeAction?: (file: File | null, previewUrl: string | null) => void;
+}) {
   const maxSizeMB = 0.5;
   const maxSize = maxSizeMB * 1024 * 1024;
 
@@ -16,7 +23,7 @@ export default function BrandingFileUpload() {
       handleDragOver,
       handleDrop,
       openFileDialog,
-      removeFile,
+      removeFile: removeUploadedFile,
       getInputProps,
     },
   ] = useFileUpload({
@@ -24,8 +31,25 @@ export default function BrandingFileUpload() {
     maxSize,
   });
 
-  const previewUrl = files[0]?.preview || null;
+  const previewUrl = files[0]?.preview || currentImage || null;
   const fileName = files[0]?.file.name || null;
+
+  // Notify parent when a new file is selected or removed
+  useEffect(() => {
+    if (onFileChangeAction) {
+      const candidate = files[0]?.file;
+      const actualFile = candidate instanceof File ? candidate : null;
+      onFileChangeAction(actualFile, files[0]?.preview || null);
+    }
+  }, [files, onFileChangeAction]);
+
+  const handleRemove = () => {
+    if (files[0]?.id) {
+      removeUploadedFile(files[0].id);
+    }
+    // Explicitly clear in parent
+    onFileChangeAction?.(null, null);
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -39,7 +63,11 @@ export default function BrandingFileUpload() {
           className="relative flex flex-col justify-center items-center data-[dragging=true]:bg-accent/50 p-4 border border-input has-[input:focus]:border-ring border-dashed rounded-xl has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 h-52 overflow-hidden transition-colors"
         >
           <input
-            {...getInputProps()}
+            {...getInputProps({
+              onChange: () => {
+                // Hook handles state update; effect above notifies parent.
+              },
+            })}
             className="sr-only"
             aria-label="Upload image file"
           />
@@ -66,10 +94,10 @@ export default function BrandingFileUpload() {
                 <b>Prefered size: 200x200px</b>
               </p>
               <Button
+                type="button"
                 variant="ghost"
                 className="mt-4 text-primary"
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={() => {
                   openFileDialog();
                 }}
               >
@@ -88,7 +116,7 @@ export default function BrandingFileUpload() {
             <button
               type="button"
               className="z-50 flex justify-center items-center bg-black/60 hover:bg-black/80 focus-visible:border-ring rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 size-8 text-white transition-[color,box-shadow] cursor-pointer"
-              onClick={() => removeFile(files[0]?.id)}
+              onClick={handleRemove}
               aria-label="Remove image"
             >
               <XIcon className="size-4" aria-hidden="true" />
