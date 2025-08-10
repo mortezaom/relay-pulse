@@ -1,8 +1,6 @@
 import type { BrandingDataType } from "./branding-data";
 
-export const KV_DASHBOARD_KEY = "data:dashboard-data";
-
-const BRANDING_CACHE: Map<string, BrandingDataType> = new Map();
+export const KV_BRANDING_KEY = "branding-data";
 
 export const saveFileToBucket = async (
   env: CloudflareEnv,
@@ -30,9 +28,7 @@ export const saveBrandingData = async (
   data: BrandingDataType,
 ) => {
   const rKV = env.RELAY_PULSE_KV;
-  await rKV.put(KV_DASHBOARD_KEY, JSON.stringify(data));
-
-  BRANDING_CACHE.set("branding", data);
+  await rKV.put(KV_BRANDING_KEY, JSON.stringify(data));
 
   return data;
 };
@@ -40,20 +36,12 @@ export const saveBrandingData = async (
 export const getBrandingData = async (
   env: CloudflareEnv,
 ): Promise<BrandingDataType | null> => {
-
-  if (BRANDING_CACHE.has("branding")) {
-    return BRANDING_CACHE.get("branding") ?? null;
-  }
-
   const rKV = env.RELAY_PULSE_KV;
-  const kvData = await rKV.get(KV_DASHBOARD_KEY);
-
+  const kvData = await rKV.get(KV_BRANDING_KEY);
   if (!kvData) return null;
 
   try {
     const parsedData = JSON.parse(kvData);
-
-    BRANDING_CACHE.set("branding", parsedData);
 
     return parsedData as BrandingDataType;
   } catch {

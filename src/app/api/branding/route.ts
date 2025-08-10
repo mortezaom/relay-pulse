@@ -35,6 +35,12 @@ export async function POST(req: Request) {
       const imageKey = await saveFileToBucket(cfEnv, file);
       brandingData.imageUrl = imageKey ? convertFileKeyToUrl(imageKey) : null;
     }
+    if (!brandingData.imageUrl) {
+      const existingData = await getBrandingData(cfEnv);
+      if (existingData?.imageUrl) {
+        brandingData.imageUrl = existingData.imageUrl;
+      }
+    }
 
     await saveBrandingData(cfEnv, brandingData);
 

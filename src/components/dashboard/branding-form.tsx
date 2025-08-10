@@ -40,7 +40,7 @@ export function BrandingForm({ data }: BrandingFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: data?.title || "Relay Pulse",
-      description: data?.description || "Status Checker Page base on Relay Pulse!",
+      description: data?.description || "Uptime monitoring and status page | Relay Pulse",
       alertText: data?.alert || "All Services are Operational!",
     }
   });
