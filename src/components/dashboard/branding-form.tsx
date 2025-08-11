@@ -31,12 +31,14 @@ const formSchema = z.object({
   alertText: z.string().check(z.trim(), z.minLength(2)),
 });
 
+type FormType = z.infer<typeof formSchema>
+
 export function BrandingForm({ data }: BrandingFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [bLoading, setBLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: data?.title || "Relay Pulse",
@@ -45,7 +47,7 @@ export function BrandingForm({ data }: BrandingFormProps) {
     }
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormType) => {
     setBLoading(true);
     try {
       const formData = new FormData();

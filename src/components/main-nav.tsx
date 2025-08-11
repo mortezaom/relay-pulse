@@ -17,7 +17,7 @@ export function MainNav(props: { className?: string, bData: BrandingDataType | n
           className="flex justify-center items-center size-12"
         >
           {props.bData?.imageUrl ? (
-            // biome-ignore lint/performance/noImgElement: img prop for logo
+            // biome-ignore lint/performance/noImgElement: img, no optimization needed for logo
             <img
               src={props.bData.imageUrl}
               alt="Logo"
