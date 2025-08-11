@@ -22,9 +22,9 @@ export async function POST(req: Request) {
 
     const service: ServiceType = body.data;
 
-    await saveService(service);
+    const savedService = await saveService(service);
 
-    return successResponse(service, 201);
+    return successResponse(savedService, 201);
   } catch (err) {
     return errorResponse(String(err), 500);
   }

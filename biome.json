@@ -12,9 +12,9 @@
   "formatter": {
     "enabled": true,
     "indentStyle": "tab",
-    "bracketSpacing": true,
+    "bracketSpacing": false,
     "indentWidth": 4,
-    "lineWidth": 75,
+    "lineWidth": 70,
     "formatWithErrors": true
   },
   "assist": {

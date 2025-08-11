@@ -29,15 +29,17 @@ type ServiceDialogProps = {
   service?: ServiceType | null;
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
+  onServiceSavedAction?: (service?: ServiceType) => void;
 }
 
-export function ServiceDialog({ service, open, onOpenChangeAction }: ServiceDialogProps) {
+export function ServiceDialog(props: ServiceDialogProps) {
+  const { service, open, onOpenChangeAction, onServiceSavedAction } = props;
   const [loading, setLoading] = useState(false);
 
   const form = useForm<ServiceType>({
     resolver: zodResolver(serviceSchema),
-    defaultValues: service || {
-      id: -1, // -1 indicates a new service
+    defaultValues: service ?? {
+      id: -1,
       port: 80,
       type: 'http',
       name: '',
@@ -62,8 +64,13 @@ export function ServiceDialog({ service, open, onOpenChangeAction }: ServiceDial
         return;
       }
 
+      const { data }: { data: ServiceType } = await response.json();
+
       toast.success("Service data saved successfully!");
-      onOpenChangeAction(false)
+      form.reset();
+      if (onServiceSavedAction) {
+        onServiceSavedAction(data);
+      }
       setLoading(false);
     } catch (error) {
       console.error(error);

@@ -25,3 +25,11 @@ export const saveService = async (service: ServiceType) => {
     return updatedService;
   }
 }
+
+export const deleteService = async (id: number) => {
+  const db = await getDb();
+  const [deletedService] = await db.delete(services)
+    .where(eq(services.id, id))
+    .returning();
+  return deletedService;
+}

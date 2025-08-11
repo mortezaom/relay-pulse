@@ -3,7 +3,7 @@
 import { AlertCircleIcon, ImageIcon, UploadIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function BrandingFileUpload({
   currentImage,
@@ -31,7 +31,8 @@ export default function BrandingFileUpload({
     maxSize,
   });
 
-  const previewUrl = files[0]?.preview || currentImage || null;
+  const [current, setCurrent] = useState(currentImage)
+  const previewUrl = files[0]?.preview || null;
   const fileName = files[0]?.file.name || null;
 
   // Notify parent when a new file is selected or removed
@@ -49,7 +50,12 @@ export default function BrandingFileUpload({
     }
     // Explicitly clear in parent
     onFileChangeAction?.(null, null);
+    if (current) {
+      setCurrent(null)
+    }
   };
+
+  const preview = previewUrl || current || null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -71,11 +77,11 @@ export default function BrandingFileUpload({
             className="sr-only"
             aria-label="Upload image file"
           />
-          {previewUrl ? (
+          {preview ? (
             <div className="absolute inset-0 flex justify-center items-center p-4 h-full">
               {/** biome-ignore lint/performance/noImgElement: client side image */}
               <img
-                src={previewUrl}
+                src={preview}
                 alt={fileName || "Uploaded image"}
                 className="mx-auto rounded max-h-full object-contain"
               />
@@ -111,7 +117,7 @@ export default function BrandingFileUpload({
           )}
         </div>
 
-        {previewUrl && (
+        {preview && (
           <div className="top-4 right-4 absolute">
             <button
               type="button"
