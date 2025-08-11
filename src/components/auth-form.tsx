@@ -30,13 +30,10 @@ const AuthForm = ({ isInitialized }: { isInitialized: boolean }) => {
 	const onSubmit = async (data: SetupSchemaType | LoginSchemaType) => {
 		setLoading(true);
 
-		const response = await fetch(
-			`/api/${isInitialized ? "login" : "setup"}`,
-			{
-				body: JSON.stringify(data),
-				method: "POST",
-			},
-		);
+		const response = await fetch(`/api/${isInitialized ? "login" : "setup"}`, {
+			body: JSON.stringify(data),
+			method: "POST",
+		});
 
 		setLoading(false);
 
@@ -45,9 +42,7 @@ const AuthForm = ({ isInitialized }: { isInitialized: boolean }) => {
 		if (!responseJson.ok) {
 			toast.error(responseJson.message);
 		} else {
-			toast.success(
-				`${isInitialized ? "Login" : "Initialized"} Successfully!`,
-			);
+			toast.success(`${isInitialized ? "Login" : "Initialized"} Successfully!`);
 
 			setTimeout(() => {
 				redirect("/dashboard");
@@ -79,10 +74,7 @@ const AuthSetupForm: React.FC<{
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8"
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 				<FormField
 					control={form.control}
 					name="email"
@@ -90,11 +82,7 @@ const AuthSetupForm: React.FC<{
 						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
-								<Input
-									type="email"
-									placeholder="auth@example.com"
-									{...field}
-								/>
+								<Input type="email" placeholder="auth@example.com" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -107,11 +95,7 @@ const AuthSetupForm: React.FC<{
 						<FormItem>
 							<FormLabel>Password</FormLabel>
 							<FormControl>
-								<Input
-									type="password"
-									placeholder="--------"
-									{...field}
-								/>
+								<Input type="password" placeholder="--------" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -162,10 +146,7 @@ const AuthLoginForm: React.FC<{
 
 	return (
 		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="space-y-8"
-			>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 				<FormField
 					control={form.control}
 					name="email"
@@ -173,11 +154,7 @@ const AuthLoginForm: React.FC<{
 						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
-								<Input
-									type="email"
-									placeholder="auth@example.com"
-									{...field}
-								/>
+								<Input type="email" placeholder="auth@example.com" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -190,11 +167,7 @@ const AuthLoginForm: React.FC<{
 						<FormItem>
 							<FormLabel>Password</FormLabel>
 							<FormControl>
-								<Input
-									type="password"
-									placeholder="--------"
-									{...field}
-								/>
+								<Input type="password" placeholder="--------" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

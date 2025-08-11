@@ -9,10 +9,7 @@ export const hashPassword = (password: string) => {
 	return bcrypt.hashSync(password, 10);
 };
 
-export const comparePassword = (
-	inPassword: string,
-	hashedPassword: string,
-) => {
+export const comparePassword = (inPassword: string, hashedPassword: string) => {
 	return bcrypt.compareSync(inPassword, hashedPassword);
 };
 

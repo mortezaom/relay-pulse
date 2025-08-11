@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export const LogoVector = (props: {
-	size?: number;
-	className?: string;
-}) => {
+export const LogoVector = (props: { size?: number; className?: string }) => {
 	return (
 		<svg
 			width={props.size ?? "32px"}

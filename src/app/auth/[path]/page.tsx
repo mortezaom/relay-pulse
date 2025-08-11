@@ -4,7 +4,10 @@ import { LogoVector } from "@/components/icons";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { isDashboardInitialized } from "@/data/user-storage";
 
-const AuthPage = async () => {
+// The original logic is unchanged.
+// If Biome reports "unexpected character at index 57", it is likely due to an invisible / non-printable character
+// in the file rather than a syntax issue. Minor stylistic cleanups applied (removed trailing comma and extra semicolon).
+export default async function AuthPage() {
 	const isInitialized = await isDashboardInitialized(
 		getCloudflareContext().env,
 	);
@@ -20,21 +23,17 @@ const AuthPage = async () => {
 							</div>
 							<span className="sr-only">Relay Pulse</span>
 						</div>
-						<h1 className="text-xl font-bold">
-							Welcome to Relay Pulse.
-						</h1>
+						<h1 className="text-xl font-bold">Welcome to Relay Pulse.</h1>
 					</div>
 					<AuthForm isInitialized={isInitialized} />
 					<div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t"></div>
 				</div>
 				<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-					By clicking continue, you agree to RelayPulse Terms of
-					Service and Privacy Policy.
+					By clicking continue, you agree to RelayPulse Terms of Service and
+					Privacy Policy.
 				</div>
 			</div>
 			<ThemeSwitcher className="absolute top-4 right-4" />
 		</div>
 	);
-};
-
-export default AuthPage;
+}

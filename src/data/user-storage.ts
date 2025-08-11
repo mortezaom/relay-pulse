@@ -19,10 +19,7 @@ export const getAuthUser = async (env: CloudflareEnv) => {
 	return JSON.parse(userString) as AuthUser;
 };
 
-export const saveAuthUser = async (
-	env: CloudflareEnv,
-	userData: AuthUser,
-) => {
+export const saveAuthUser = async (env: CloudflareEnv, userData: AuthUser) => {
 	const rKV = env.RELAY_PULSE_KV;
 	await rKV.put(KV_AUTH_KEY, JSON.stringify(userData));
 	return userData;
