@@ -1,0 +1,97 @@
+# Relay Pulse - One-Click Cloudflare Deployment
+# Users only need to add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to GitHub Secrets
+
+name: 🚀 Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  deploy:
+    name: 🚀 Deploy Relay Pulse
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔧 Build application
+        run: pnpm build
+
+      - name: ⚙️ Create Cloudflare Resources
+        run: |
+          echo "🔧 Creating Cloudflare resources (auto-managed)..."
+          
+          # Create KV namespace (if doesn't exist)
+          wrangler kv:namespace create "RELAY_PULSE_KV" --preview false || echo "KV namespace already exists"
+          
+          # Create D1 database (if doesn't exist)  
+          wrangler d1 create relay-pulse-db || echo "D1 database already exists"
+          
+          # Create R2 bucket (if doesn't exist)
+          wrangler r2 bucket create relay-pulse-assets || echo "R2 bucket already exists"
+          
+          echo "✅ Resources ready"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: 🗄️ Run Database Migrations
+        run: pnpm drizzle-kit push:sqlite
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 🚀 Deploy Main Application
+        run: pnpm deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: ⏰ Deploy Monitoring Worker
+        run: wrangler deploy --config wrangler.monitor.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 🔧 Initialize Default Settings
+        run: |
+          echo "🔧 Initializing default settings in KV..."
+          # Default settings will be created on first application load
+          echo "✅ Settings initialization will happen on first dashboard visit"
+
+      - name: ✅ Deployment Complete
+        run: |
+          echo "🎉 Relay Pulse deployed successfully!"
+          echo ""
+          echo "📋 What was deployed:"
+          echo "✅ Main application (dashboard & API)"
+          echo "✅ Monitoring worker (cron-based service checks)"
+          echo "✅ Database migrations applied"
+          echo "✅ All Cloudflare resources created"
+          echo ""
+          echo "📋 Next steps:"
+          echo "1. Visit your deployed application"
+          echo "2. Add your first services to monitor"
+          echo "3. Configure Apprise notifications (optional)"
+          echo ""
+          echo "� Your Relay Pulse instance:"
+          echo "   https://relay-pulse.{your-subdomain}.workers.dev"

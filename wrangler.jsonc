@@ -1,6 +1,6 @@
 /**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
+ * Relay Pulse - Main Application Configuration
+ * Resources are auto-created during deployment - no manual configuration needed
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
@@ -18,51 +18,20 @@
 	"kv_namespaces": [
 		{
 			"binding": "RELAY_PULSE_KV",
-			"id": "RELAY_PULSE_ID"
+			"preview_id": "relay-pulse-kv-preview"
 		}
 	],
 	"r2_buckets": [
 		{
 			"binding": "RELAY_PULSE_BUCKET",
-			"bucket_name": "relay-pulse"
+			"bucket_name": "relay-pulse-assets"
 		}
 	],
 	"d1_databases": [
 		{
 			"binding": "RELAY_PULSE_DB",
-			"database_id": "RELAY_PULSE",
-			"database_name": "relay-pulse",
+			"database_name": "relay-pulse-db",
 			"migrations_dir": "./migrations"
 		}
 	]
-	/**
-	 * Smart Placement
-	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": { "mode": "smart" },
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 */
-	// "vars": { "MY_VARIABLE": "production_value" },
-	/**
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": { "directory": "./public/", "binding": "ASSETS" },
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }

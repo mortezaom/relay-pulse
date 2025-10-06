@@ -140,6 +140,11 @@ export function ServicesList() {
 							<TableHead className="text-center">Type</TableHead>
 							<TableHead className="text-center">Address</TableHead>
 							<TableHead className="text-center">Port</TableHead>
+							{/* TODO: Add status columns */}
+							{/* <TableHead className="text-center">Status</TableHead> */}
+							{/* <TableHead className="text-center">Uptime</TableHead> */}
+							{/* <TableHead className="text-center">Response Time</TableHead> */}
+							{/* <TableHead className="text-center">Last Check</TableHead> */}
 							<TableHead className="text-center">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -155,6 +160,19 @@ export function ServicesList() {
 								<TableCell className="text-center">
 									{service.port ?? (service.type === "http" ? "80" : "443")}
 								</TableCell>
+								{/* TODO: Add monitoring status cells */}
+								{/* <TableCell className="text-center">
+									<StatusBadge status={service.status} />
+								</TableCell>
+								<TableCell className="text-center">
+									{service.uptime?.toFixed(1)}%
+								</TableCell>
+								<TableCell className="text-center">
+									{service.responseTime}ms
+								</TableCell>
+								<TableCell className="text-center">
+									{service.lastCheck ? formatDistanceToNow(new Date(service.lastCheck), { addSuffix: true }) : 'Never'}
+								</TableCell> */}
 								<TableCell className="flex justify-center items-center gap-2">
 									<Button
 										variant="ghost"
