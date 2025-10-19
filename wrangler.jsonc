@@ -7,7 +7,10 @@
 	"name": "relay-pulse",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2025-03-01",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
@@ -18,7 +21,8 @@
 	"kv_namespaces": [
 		{
 			"binding": "RELAY_PULSE_KV",
-			"preview_id": "relay-pulse-kv-preview"
+			"id": "c325e07132e520c6a7a908038f3d94c5",
+			"preview_id": "4c9a1f4c7ab278f5bfe1e4da22e073ef"
 		}
 	],
 	"r2_buckets": [
@@ -31,6 +35,7 @@
 		{
 			"binding": "RELAY_PULSE_DB",
 			"database_name": "relay-pulse-db",
+			"database_id": "901b4b95-d9ae-4f58-a331-f6b45fa21506",
 			"migrations_dir": "./migrations"
 		}
 	]

@@ -33,7 +33,7 @@ export async function monitorService(
   env: CloudflareEnv
 ): Promise<MonitoringResult> {
   const startTime = Date.now();
-  
+
   try {
     // TODO: Implement service type-specific monitoring
     switch (service.type) {
@@ -41,7 +41,7 @@ export async function monitorService(
       case "https":
         return await monitorHttpService(service, startTime);
       case "tcp":
-        return await monitorTcpService(service, startTime);
+        return await monitorTcpService(service, startTime, env);
       default:
         throw new Error(`Unsupported service type: ${service.type}`);
     }
@@ -67,7 +67,7 @@ async function monitorHttpService(
   // const url = `${service.type}://${service.address}:${service.port}`;
   // const controller = new AbortController();
   // const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
-  
+
   // try {
   //   const response = await fetch(url, {
   //     method: "HEAD", // Use HEAD to minimize data transfer
@@ -112,45 +112,96 @@ async function monitorHttpService(
 }
 
 /**
- * TODO: Monitor TCP services
- * Check if the port is reachable and responding
+ * Monitor TCP services via external TCP checker service
+ * 
+ * TCP monitoring requires socket connections which are not available in Cloudflare Workers free tier.
+ * We use an external Go-based service that can perform TCP checks and return results.
+ * 
+ * External Service: https://github.com/mortezaom/relay-pulse-tcp-checker
  */
 async function monitorTcpService(
   service: ServiceConfig,
-  startTime: number
+  startTime: number,
+  env: CloudflareEnv
 ): Promise<MonitoringResult> {
-  // TODO: Implement TCP monitoring
-  // Note: TCP monitoring in Cloudflare Workers requires using the connect() API
-  // which may not be available in all environments
-  
-  // try {
-  //   const socket = connect({
-  //     hostname: service.address,
-  //     port: service.port,
-  //   });
-  //   
-  //   await socket.write(new Uint8Array(0)); // Send empty data to test connection
-  //   socket.close();
-  //   
-  //   const responseTime = Date.now() - startTime;
-  //   
-  //   return {
-  //     serviceId: service.id,
-  //     status: "up",
-  //     responseTime,
-  //     timestamp: new Date().toISOString(),
-  //   };
-  // } catch (error) {
-  //   throw error;
-  // }
+  try {
+    // Get TCP checker endpoint from settings
+    const tcpCheckerUrl = await getTcpCheckerUrl(env);
 
-  // Placeholder implementation
-  return {
-    serviceId: service.id,
-    status: "up",
-    responseTime: Date.now() - startTime,
-    timestamp: new Date().toISOString(),
-  };
+    if (!tcpCheckerUrl) {
+      // No TCP checker configured
+      return {
+        serviceId: service.id,
+        status: "error",
+        errorMessage: "TCP checker service not configured. Please set TCP checker URL in Settings.",
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // Call external TCP checker service
+    const response = await fetch(tcpCheckerUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Relay-Pulse-Monitor/1.0",
+      },
+      body: JSON.stringify({
+        host: service.address,
+        port: service.port,
+        timeout: 30000, // 30 seconds
+      }),
+      signal: AbortSignal.timeout(35000), // 35 second timeout for the request itself
+    });
+
+    if (!response.ok) {
+      throw new Error(`TCP checker returned ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json() as TcpCheckResponse;
+    const responseTime = Date.now() - startTime;
+
+    return {
+      serviceId: service.id,
+      status: result.reachable ? "up" : "down",
+      responseTime: result.responseTime || responseTime,
+      errorMessage: result.error || undefined,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    return {
+      serviceId: service.id,
+      status: "error",
+      errorMessage: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
+/**
+ * Get TCP checker URL from KV settings
+ */
+async function getTcpCheckerUrl(env: CloudflareEnv): Promise<string | null> {
+  try {
+    const settingsData = await env.RELAY_PULSE_KV.get("settings:global");
+    if (!settingsData) return null;
+
+    const settings = JSON.parse(settingsData) as { tcpCheckerUrl?: string };
+    return settings.tcpCheckerUrl || null;
+  } catch (error) {
+    console.error("Failed to get TCP checker URL:", error);
+    return null;
+  }
+}
+
+/**
+ * Response format from external TCP checker service
+ */
+interface TcpCheckResponse {
+  reachable: boolean;      // true if port is open and responding
+  responseTime?: number;   // time in milliseconds
+  error?: string;          // error message if check failed
+  host: string;            // echoed back for verification
+  port: number;            // echoed back for verification
 }
 
 /**
@@ -171,7 +222,7 @@ export async function saveMonitoringResult(
   //   statusCode: result.statusCode,
   //   errorMessage: result.errorMessage,
   // });
-  
+
   console.log("Monitoring result:", result);
 }
 
@@ -187,7 +238,7 @@ export async function handleIncidentManagement(
   // 2. Look for existing ongoing incident
   // 3. Create new incident if needed
   // 4. Resolve incident if service is back up
-  
+
   if (result.status === "down" || result.status === "error" || result.status === "timeout") {
     // TODO: Create or update incident
     console.log(`Service ${result.serviceId} is down, should create/update incident`);
@@ -208,7 +259,7 @@ export async function handleNotifications(
   // 1. Get notification settings for the service
   // 2. Check if alert threshold is met
   // 3. Send email/webhook notifications
-  
+
   if (result.status !== "up") {
     console.log(`Should send notification for service ${result.serviceId}`);
     // TODO: Send notifications

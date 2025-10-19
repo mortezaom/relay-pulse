@@ -9,6 +9,7 @@ export interface GlobalSettings {
   defaultMonitoringInterval: number; // minutes
   defaultAlertThreshold: number;
   maxServices: number;
+  tcpCheckerUrl?: string; // External TCP checker service endpoint
 }
 
 export interface MonitoringSettings {
@@ -40,11 +41,11 @@ const KV_KEYS = {
 export async function getGlobalSettings(env: CloudflareEnv): Promise<GlobalSettings> {
   try {
     const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.globalSettings);
-    
+
     if (settings) {
       return JSON.parse(settings);
     }
-    
+
     // Return defaults if not found
     return getDefaultGlobalSettings();
   } catch (error) {
@@ -73,6 +74,7 @@ function getDefaultGlobalSettings(): GlobalSettings {
     defaultMonitoringInterval: 1, // 1 minute
     defaultAlertThreshold: 3, // 3 failures before alert
     maxServices: 100,
+    tcpCheckerUrl: "", // Optional: External TCP checker service
   };
 }
 
@@ -85,11 +87,11 @@ export async function getMonitoringSettings(
 ): Promise<MonitoringSettings> {
   try {
     const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.monitoring(serviceId));
-    
+
     if (settings) {
       return JSON.parse(settings);
     }
-    
+
     // Return defaults if not found
     const globalSettings = await getGlobalSettings(env);
     return {
@@ -134,11 +136,11 @@ export async function getNotificationSettings(
 ): Promise<NotificationSettings | null> {
   try {
     const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.notification(serviceId));
-    
+
     if (settings) {
       return JSON.parse(settings);
     }
-    
+
     return null; // No notification configured
   } catch (error) {
     console.error("Failed to get notification settings:", error);
@@ -253,7 +255,7 @@ export async function getAllServicesWithSettings(
           getMonitoringSettings(service.id, env),
           getNotificationSettings(service.id, env),
         ]);
-        
+
         return {
           ...service,
           monitoring,
@@ -261,7 +263,7 @@ export async function getAllServicesWithSettings(
         };
       })
     );
-    
+
     return servicesWithSettings;
   } catch (error) {
     console.error("Failed to get services with settings:", error);

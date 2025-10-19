@@ -97,7 +97,7 @@ export function ServiceDialog(props: ServiceDialogProps) {
 						<DialogHeader>
 							<DialogTitle>{service ? "Edit" : "Add"} Service</DialogTitle>
 						</DialogHeader>
-						<div className="grid gap-4">
+						<div className="gap-4 grid">
 							<FormField
 								control={form.control}
 								name="name"
@@ -159,6 +159,25 @@ export function ServiceDialog(props: ServiceDialogProps) {
 											</SelectContent>
 										</Select>
 										<FormMessage />
+										{field.value === "tcp" && (
+											<div className="space-y-2 bg-blue-50 dark:bg-blue-950/20 mt-2 p-3 border border-blue-200 dark:border-blue-800 rounded-lg">
+												<p className="font-medium text-blue-900 dark:text-blue-100 text-xs">
+													🔌 TCP Monitoring via External Service
+												</p>
+												<p className="text-blue-700 dark:text-blue-300 text-xs">
+													TCP port checking requires an external Go service due to Cloudflare Workers limitations.
+													Configure the TCP checker endpoint in Settings or deploy your own instance.
+												</p>
+												<a
+													href="https://github.com/mortezaom/relay-pulse-tcp-checker"
+													target="_blank"
+													rel="noopener noreferrer"
+													className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs hover:underline"
+												>
+													Deploy TCP Checker Service →
+												</a>
+											</div>
+										)}
 									</FormItem>
 								)}
 							/>

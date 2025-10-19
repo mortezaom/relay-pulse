@@ -12,7 +12,8 @@
 	"kv_namespaces": [
 		{
 			"binding": "RELAY_PULSE_KV",
-			"preview_id": "relay-pulse-kv-preview"
+			"id": "c325e07132e520c6a7a908038f3d94c5",
+			"preview_id": "4c9a1f4c7ab278f5bfe1e4da22e073ef"
 		}
 	],
 	"r2_buckets": [
@@ -24,7 +25,8 @@
 	"d1_databases": [
 		{
 			"binding": "RELAY_PULSE_DB",
-			"database_name": "relay-pulse-db"
+			"database_name": "relay-pulse-db",
+			"database_id": "901b4b95-d9ae-4f58-a331-f6b45fa21506"
 		}
 	]
 }

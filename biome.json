@@ -1,9 +1,12 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
 		"bracketSpacing": true
+	},
+	"files": {
+		"includes": ["src/**/*.js", "*.ts"]
 	},
 	"assist": {
 		"actions": {
@@ -13,6 +16,7 @@
 		}
 	},
 	"linter": {
+		"includes": ["**", "!test"],
 		"enabled": true,
 		"rules": {
 			"recommended": true,
@@ -30,8 +34,8 @@
 				"noNonNullAssertion": "off",
 				"noParameterAssign": "off"
 			},
-			"performance": {
-				"noDelete": "off"
+			"correctness": {
+				"useParseIntRadix": "off"
 			}
 		}
 	},
@@ -43,6 +47,9 @@
 			"indentStyle": "tab",
 			"semicolons": "always",
 			"trailingCommas": "all"
+		},
+		"linter": {
+			"enabled": true
 		}
 	},
 	"json": {

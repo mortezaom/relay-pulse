@@ -5,6 +5,7 @@ import type { ServiceType } from "./services-data";
 
 export const getServiceList = async () => {
 	const db = await getDb();
+	console.log(db)
 	const allServices = await db.select().from(services);
 	return allServices;
 };

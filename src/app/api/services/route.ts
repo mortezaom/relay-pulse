@@ -11,7 +11,7 @@ export const runtime = "edge";
 export async function GET(_: NextRequest) {
 	try {
 		const services = await getServiceList();
-		
+
 		// TODO: Enhance with monitoring data
 		// const servicesWithStatus = await Promise.all(
 		//   services.map(async (service) => ({
@@ -25,6 +25,7 @@ export async function GET(_: NextRequest) {
 
 		return successResponse(services, 200);
 	} catch (err) {
+		console.error(err)
 		return errorResponse(String(err), 500);
 	}
 }
