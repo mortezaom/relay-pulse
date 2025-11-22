@@ -71,7 +71,7 @@ export async function saveGlobalSettings(
 function getDefaultGlobalSettings(): GlobalSettings {
   return {
     appName: "Relay Pulse",
-    defaultMonitoringInterval: 1, // 1 minute
+    defaultMonitoringInterval: 5, // 5 minutes - optimized for free tier
     defaultAlertThreshold: 3, // 3 failures before alert
     maxServices: 100,
     tcpCheckerUrl: "", // Optional: External TCP checker service
@@ -106,7 +106,7 @@ export async function getMonitoringSettings(
     return {
       serviceId,
       enabled: true,
-      interval: 1,
+      interval: 5, // Default to 5 minutes (free-tier friendly)
       timeout: 30,
       retryAttempts: 3,
     };

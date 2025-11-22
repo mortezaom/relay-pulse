@@ -56,59 +56,66 @@ export async function monitorService(
 }
 
 /**
- * TODO: Monitor HTTP/HTTPS services
+ * Monitor HTTP/HTTPS services
  * Check response time, status code, and basic connectivity
  */
 async function monitorHttpService(
   service: ServiceConfig,
   startTime: number
 ): Promise<MonitoringResult> {
-  // TODO: Implement HTTP monitoring
-  // const url = `${service.type}://${service.address}:${service.port}`;
-  // const controller = new AbortController();
-  // const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+  const url = `${service.type}://${service.address}:${service.port}`;
 
-  // try {
-  //   const response = await fetch(url, {
-  //     method: "HEAD", // Use HEAD to minimize data transfer
-  //     signal: controller.signal,
-  //     headers: {
-  //       "User-Agent": "Relay-Pulse-Monitor/1.0",
-  //     },
-  //   });
-  //   
-  //   clearTimeout(timeoutId);
-  //   const responseTime = Date.now() - startTime;
-  //   
-  //   return {
-  //     serviceId: service.id,
-  //     status: response.ok ? "up" : "down",
-  //     responseTime,
-  //     statusCode: response.status,
-  //     timestamp: new Date().toISOString(),
-  //   };
-  // } catch (error) {
-  //   clearTimeout(timeoutId);
-  //   
-  //   if (error.name === "AbortError") {
-  //     return {
-  //       serviceId: service.id,
-  //       status: "timeout",
-  //       timestamp: new Date().toISOString(),
-  //     };
-  //   }
-  //   
-  //   throw error;
-  // }
+  try {
+    const controller = new AbortController();
+    const timeoutMs = 30000; // 30 seconds
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  // Placeholder implementation
-  return {
-    serviceId: service.id,
-    status: "up",
-    responseTime: Date.now() - startTime,
-    statusCode: 200,
-    timestamp: new Date().toISOString(),
-  };
+    try {
+      const response = await fetch(url, {
+        method: "HEAD", // Use HEAD to minimize data transfer
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "Relay-Pulse-Monitor/1.0",
+        },
+        // Don't follow redirects to keep response fast
+        redirect: "manual",
+      });
+
+      clearTimeout(timeoutId);
+      const responseTime = Date.now() - startTime;
+
+      return {
+        serviceId: service.id,
+        status: response.ok || response.status === 301 || response.status === 302 ? "up" : "down",
+        responseTime,
+        statusCode: response.status,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      // Check if it was a timeout
+      if (error instanceof Error && error.name === "AbortError") {
+        return {
+          serviceId: service.id,
+          status: "timeout",
+          errorMessage: `Request timeout after ${timeoutMs}ms`,
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      throw error;
+    }
+  } catch (error) {
+    const responseTime = Date.now() - startTime;
+    return {
+      serviceId: service.id,
+      status: "error",
+      errorMessage: error instanceof Error ? error.message : String(error),
+      responseTime,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
 
 /**
@@ -205,46 +212,98 @@ interface TcpCheckResponse {
 }
 
 /**
- * TODO: Save monitoring result to database
+ * Save monitoring result to database
  */
 export async function saveMonitoringResult(
   result: MonitoringResult,
   env: CloudflareEnv
 ): Promise<void> {
-  // TODO: Implement database saving
-  // const db = drizzle(env.RELAY_PULSE_DB);
-  // 
-  // await db.insert(monitoringResults).values({
-  //   serviceId: result.serviceId,
-  //   timestamp: result.timestamp,
-  //   status: result.status,
-  //   responseTime: result.responseTime,
-  //   statusCode: result.statusCode,
-  //   errorMessage: result.errorMessage,
-  // });
+  try {
+    const { getWorkerDb } = await import("@/db/index");
+    const { monitoringResults } = await import("@/db/schema");
 
-  console.log("Monitoring result:", result);
+    const db = getWorkerDb(env.RELAY_PULSE_DB);
+
+    await db.insert(monitoringResults).values({
+      serviceId: result.serviceId,
+      timestamp: result.timestamp,
+      status: result.status,
+      responseTime: result.responseTime || null,
+      statusCode: result.statusCode || null,
+      errorMessage: result.errorMessage || null,
+    });
+  } catch (error) {
+    console.error("Failed to save monitoring result:", error);
+    // Don't throw - continue even if DB save fails to prevent worker crash
+  }
 }
 
 /**
- * TODO: Check if an incident should be created or updated
+ * Check if an incident should be created or updated
  */
 export async function handleIncidentManagement(
   result: MonitoringResult,
   env: CloudflareEnv
 ): Promise<void> {
-  // TODO: Implement incident management logic
-  // 1. Check if service is down
-  // 2. Look for existing ongoing incident
-  // 3. Create new incident if needed
-  // 4. Resolve incident if service is back up
+  try {
+    const { getWorkerDb } = await import("@/db/index");
+    const { incidents } = await import("@/db/schema");
+    const { eq, and } = await import("drizzle-orm");
 
-  if (result.status === "down" || result.status === "error" || result.status === "timeout") {
-    // TODO: Create or update incident
-    console.log(`Service ${result.serviceId} is down, should create/update incident`);
-  } else {
-    // TODO: Resolve any ongoing incidents
-    console.log(`Service ${result.serviceId} is up, should resolve incidents`);
+    const db = getWorkerDb(env.RELAY_PULSE_DB);
+    const isServiceDown = result.status === "down" || result.status === "error" || result.status === "timeout";
+
+    if (isServiceDown) {
+      // Check if there's already an ongoing incident
+      const existingIncident = await db
+        .select()
+        .from(incidents)
+        .where(
+          and(
+            eq(incidents.serviceId, result.serviceId),
+            eq(incidents.status, "ongoing")
+          )
+        )
+        .limit(1);
+
+      // Create new incident if none exists
+      if (existingIncident.length === 0) {
+        await db.insert(incidents).values({
+          serviceId: result.serviceId,
+          startTime: result.timestamp,
+          status: "ongoing",
+          title: `Service Down - Check #${Math.random().toString(36).substr(2, 9)}`,
+          description: result.errorMessage || `Service returned status: ${result.status}`,
+        });
+        console.log(`Created incident for service ${result.serviceId}`);
+      }
+    } else {
+      // Service is back up - resolve any ongoing incidents
+      const ongoingIncidents = await db
+        .select()
+        .from(incidents)
+        .where(
+          and(
+            eq(incidents.serviceId, result.serviceId),
+            eq(incidents.status, "ongoing")
+          )
+        );
+
+      for (const incident of ongoingIncidents) {
+        await db
+          .update(incidents)
+          .set({
+            status: "resolved",
+            endTime: result.timestamp,
+          })
+          .where(eq(incidents.id, incident.id));
+
+        console.log(`Resolved incident ${incident.id} for service ${result.serviceId}`);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to handle incident management:", error);
+    // Don't throw - continue even if incident management fails
   }
 }
 

@@ -9,6 +9,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { credentialsSchema } from "@/data/notification-channels-data";
 import { verifyJWTToken } from "@/lib/encryption";
+import { getJwtSecret } from "@/lib/jwt-secret";
 import {
     deleteChannel as deleteChannelFromKV,
     encryptCredentials,
@@ -16,8 +17,6 @@ import {
     saveChannel,
     validateCredentials,
 } from "@/lib/notifications";
-
-const JWT_SECRET = process.env.RELAY_JWT_SECRET!;
 
 /**
  * GET - Get a specific channel (without credentials)
@@ -133,9 +132,10 @@ export async function PATCH(
                 );
             }
 
+            const jwtSecret = await getJwtSecret();
             updates.credentials = await encryptCredentials(
                 body.credentials,
-                JWT_SECRET,
+                jwtSecret,
             );
         }
 

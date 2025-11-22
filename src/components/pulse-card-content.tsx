@@ -12,9 +12,12 @@ export type LineData = {
 
 type PCardContentProps = {
 	arrayOfLines?: LineData[];
+	status?: "up" | "down" | "timeout" | "error";
+	uptime?: number;
+	responseTime?: number;
 };
 
-export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
+export const PulseCardContent = ({ arrayOfLines, status, uptime, responseTime }: PCardContentProps) => {
 	const defaultLines = Array.from({ length: 50 }).map((_, i) => ({
 		value: 100,
 		message: `Line ${i + 1}`,
@@ -85,8 +88,8 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 							transition={{ duration: 0.15 }}
 							className="flex justify-between items-center w-full"
 						>
-							<span>Operational</span>
-							<span>Uptime 99%</span>
+							<span>{status === "up" ? "Operational" : status || "Unknown"}</span>
+							<span>Uptime {uptime !== undefined ? `${uptime.toFixed(1)}%` : "N/A"}</span>
 						</motion.div>
 					)}
 				</AnimatePresence>
@@ -95,7 +98,7 @@ export const PulseCardContent = ({ arrayOfLines }: PCardContentProps) => {
 	);
 };
 
-export const PulseLineCardContent = ({ arrayOfLines }: PCardContentProps) => {
+export const PulseLineCardContent = ({ arrayOfLines, status, uptime, responseTime }: PCardContentProps) => {
 	const defaultLines = Array.from({ length: 50 }).map((_, i) => ({
 		value: 100,
 		message: `Line ${i + 1}`,
@@ -167,7 +170,7 @@ export const PulseLineCardContent = ({ arrayOfLines }: PCardContentProps) => {
 							className="flex justify-between items-center w-full"
 						>
 							<span />
-							<span>Uptime 99%</span>
+							<span>Uptime {uptime !== undefined ? `${uptime.toFixed(1)}%` : "N/A"}</span>
 						</motion.div>
 					)}
 				</AnimatePresence>

@@ -25,4 +25,10 @@ export const serviceSchema = z.object({
 	port: z.number(),
 });
 
-export type ServiceType = z.infer<typeof serviceSchema>;
+export type ServiceType = z.infer<typeof serviceSchema> & {
+	// Optional monitoring fields added by getServicesWithStatus
+	status?: "up" | "down" | "timeout" | "error";
+	uptime?: number;
+	lastCheck?: string;
+	responseTime?: number;
+};

@@ -10,10 +10,16 @@ export const PinnedPulseCard = ({
 	title,
 	link,
 	icon,
+	status,
+	uptime,
+	responseTime,
 }: {
 	title: string;
 	link: string;
 	icon: React.ReactNode;
+	status?: "up" | "down" | "timeout" | "error";
+	uptime?: number;
+	responseTime?: number;
 }) => {
 	return (
 		<Card className="flex flex-col justify-between items-stretch">
@@ -32,7 +38,7 @@ export const PinnedPulseCard = ({
 					</a>
 				</CardDescription>
 			</CardHeader>
-			<PulseCardContent />
+			<PulseCardContent status={status} uptime={uptime} responseTime={responseTime} />
 		</Card>
 	);
 };
@@ -40,10 +46,18 @@ export const PinnedPulseCard = ({
 export const LinePulseCard = ({
 	title,
 	link,
+	status,
+	uptime,
+	responseTime,
 }: {
 	title: string;
 	link: string;
+	status?: "up" | "down" | "timeout" | "error";
+	uptime?: number;
+	responseTime?: number;
 }) => {
+	const statusLabel = status === "up" ? "Operational" : status === "down" ? "Down" : status === "timeout" ? "Timeout" : status === "error" ? "Error" : "Unknown";
+	
 	return (
 		<Card className="flex flex-col justify-between items-stretch">
 			<CardHeader className="flex flex-col items-start w-full">
@@ -68,11 +82,11 @@ export const LinePulseCard = ({
 						</a>
 					</CardTitle>
 					<span className="font-bold text-blue text-muted-foreground text-sm">
-						Operational
+						{statusLabel}
 					</span>
 				</div>
 			</CardHeader>
-			<PulseLineCardContent />
+			<PulseLineCardContent status={status} uptime={uptime} responseTime={responseTime} />
 		</Card>
 	);
 };

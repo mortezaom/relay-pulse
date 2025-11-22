@@ -1,9 +1,6 @@
 import bcrypt from "bcryptjs";
 import { type JWTPayload, jwtVerify, SignJWT } from "jose";
-
-const JWT_SECRET = process.env.RELAY_JWT_SECRET;
-
-const encodedKey = new TextEncoder().encode(JWT_SECRET);
+import { getJwtSecret } from "./jwt-secret";
 
 export const hashPassword = (password: string) => {
 	return bcrypt.hashSync(password, 10);
@@ -13,7 +10,10 @@ export const comparePassword = (inPassword: string, hashedPassword: string) => {
 	return bcrypt.compareSync(inPassword, hashedPassword);
 };
 
-export const generateJWTToken = (data: object) => {
+export const generateJWTToken = async (data: object) => {
+	const secret = await getJwtSecret();
+	const encodedKey = new TextEncoder().encode(secret);
+
 	return new SignJWT({ ...data })
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
@@ -26,6 +26,9 @@ export async function verifyJWTToken(
 ): Promise<(JWTPayload & { email: string }) | null> {
 	if (!token) return null;
 	try {
+		const secret = await getJwtSecret();
+		const encodedKey = new TextEncoder().encode(secret);
+
 		const { payload } = await jwtVerify(token, encodedKey, {
 			algorithms: ["HS256"],
 		});

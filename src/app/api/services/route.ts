@@ -1,29 +1,25 @@
 import type { NextRequest } from "next/server";
 import * as z from "zod/v4-mini";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { type ServiceType, serviceSchema } from "@/data/services-data";
 import { getServiceList, saveService } from "@/data/services-storage";
+import { getServicesWithStatus } from "@/lib/monitoring/database";
 import { errorResponse, successResponse } from "@/lib/responses";
 
 export const runtime = "edge";
 
-// TODO: Add service monitoring status integration
-// When fetching services, include latest monitoring status and uptime percentage
-export async function GET(_: NextRequest) {
+export async function GET(_req: NextRequest) {
 	try {
-		const services = await getServiceList();
+		const { env } = getCloudflareContext();
 
-		// TODO: Enhance with monitoring data
-		// const servicesWithStatus = await Promise.all(
-		//   services.map(async (service) => ({
-		//     ...service,
-		//     status: await getServiceStatus(service.id),
-		//     uptime: await getServiceUptime(service.id),
-		//     lastCheck: await getLastMonitoringResult(service.id),
-		//     responseTime: await getAverageResponseTime(service.id),
-		//   }))
-		// );
+		if (!env?.RELAY_PULSE_DB) {
+			// Fallback to basic list without monitoring data if DB not available
+			const services = await getServiceList();
+			return successResponse(services, 200);
+		}
 
-		return successResponse(services, 200);
+		const servicesWithStatus = await getServicesWithStatus(env.RELAY_PULSE_DB);
+		return successResponse(servicesWithStatus, 200);
 	} catch (err) {
 		console.error(err)
 		return errorResponse(String(err), 500);

@@ -8,6 +8,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createChannelSchema } from "@/data/notification-channels-data";
 import { verifyJWTToken } from "@/lib/encryption";
+import { getJwtSecret } from "@/lib/jwt-secret";
 import {
     encryptCredentials,
     getAllChannels,
@@ -15,8 +16,6 @@ import {
     validateCredentials,
 } from "@/lib/notifications";
 import type { NotificationChannel } from "@/lib/notifications/types";
-
-const JWT_SECRET = process.env.RELAY_JWT_SECRET!;
 
 /**
  * GET - List all notification channels
@@ -96,9 +95,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Encrypt credentials
+        const jwtSecret = await getJwtSecret();
         const encryptedCredentials = await encryptCredentials(
             credentials,
-            JWT_SECRET,
+            jwtSecret,
         );
 
         // Create channel object

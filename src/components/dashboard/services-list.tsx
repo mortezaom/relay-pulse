@@ -3,8 +3,10 @@
 import { FileEditIcon, PlusCircleIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 import { ServiceDialog } from "@/components/dashboard/service-dialog";
 import ServerBadge from "@/components/server-badge";
+import StatusBadge from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -140,11 +142,10 @@ export function ServicesList() {
 							<TableHead className="text-center">Type</TableHead>
 							<TableHead className="text-center">Address</TableHead>
 							<TableHead className="text-center">Port</TableHead>
-							{/* TODO: Add status columns */}
-							{/* <TableHead className="text-center">Status</TableHead> */}
-							{/* <TableHead className="text-center">Uptime</TableHead> */}
-							{/* <TableHead className="text-center">Response Time</TableHead> */}
-							{/* <TableHead className="text-center">Last Check</TableHead> */}
+							<TableHead className="text-center">Status</TableHead>
+							<TableHead className="text-center">Uptime</TableHead>
+							<TableHead className="text-center">Response Time</TableHead>
+							<TableHead className="text-center">Last Check</TableHead>
 							<TableHead className="text-center">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -160,19 +161,18 @@ export function ServicesList() {
 								<TableCell className="text-center">
 									{service.port ?? (service.type === "http" ? "80" : "443")}
 								</TableCell>
-								{/* TODO: Add monitoring status cells */}
-								{/* <TableCell className="text-center">
+								<TableCell className="text-center">
 									<StatusBadge status={service.status} />
 								</TableCell>
 								<TableCell className="text-center">
-									{service.uptime?.toFixed(1)}%
+									{service.uptime !== undefined ? `${service.uptime.toFixed(1)}%` : "N/A"}
 								</TableCell>
 								<TableCell className="text-center">
-									{service.responseTime}ms
+									{service.responseTime !== undefined ? `${service.responseTime}ms` : "N/A"}
 								</TableCell>
 								<TableCell className="text-center">
-									{service.lastCheck ? formatDistanceToNow(new Date(service.lastCheck), { addSuffix: true }) : 'Never'}
-								</TableCell> */}
+									{service.lastCheck ? formatDistanceToNow(new Date(service.lastCheck), { addSuffix: true }) : "Never"}
+								</TableCell>
 								<TableCell className="flex justify-center items-center gap-2">
 									<Button
 										variant="ghost"
@@ -197,8 +197,8 @@ export function ServicesList() {
 						{!loading && services.length < 1 && (
 							<TableRow>
 								<TableCell
-									colSpan={6}
-									className="text-center font-semibold text-muted-foreground py-6"
+									colSpan={10}
+									className="py-6 font-semibold text-muted-foreground text-center"
 								>
 									No services found
 								</TableCell>
@@ -229,19 +229,19 @@ const ShimmerRow = () => {
 	return (
 		<TableRow key={"shimmer"}>
 			<TableCell className="justify-center">
-				<Skeleton className="h-5 w-2.5" />
+				<Skeleton className="w-2.5 h-5" />
 			</TableCell>
 			<TableCell>
-				<Skeleton className="h-5 w-36" />
+				<Skeleton className="w-36 h-5" />
 			</TableCell>
 			<TableCell className="text-center">
-				<Skeleton className="h-5 w-15 mx-auto" />
+				<Skeleton className="mx-auto w-15 h-5" />
 			</TableCell>
 			<TableCell className="text-center">
-				<Skeleton className="h-5 w-32 mx-auto" />
+				<Skeleton className="mx-auto w-32 h-5" />
 			</TableCell>
 			<TableCell className="text-center">
-				<Skeleton className="h-5 w-12 mx-auto" />
+				<Skeleton className="mx-auto w-12 h-5" />
 			</TableCell>
 			<TableCell className="flex justify-center items-center gap-2"></TableCell>
 		</TableRow>
