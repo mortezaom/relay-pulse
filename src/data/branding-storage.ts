@@ -5,14 +5,23 @@ export const KV_BRANDING_KEY = "branding-data";
 const MAX_LOGO_SIZE = 200; // Max dimension (width/height) in pixels
 
 /**
- * Resizes and converts an image file to base64 data URI
- * Crops/resizes to a maximum of 200x200px for efficiency
+ * Processes and converts an image file to base64 data URI
+ * - SVG files: Preserved as-is (maintains scalability and small size)
+ * - Raster images (PNG/JPG/GIF): Resized to max 200x200px and converted to PNG
  */
 export const processImageToBase64 = async (
   file: File
 ): Promise<string | null> => {
   try {
     const arrayBuffer = await file.arrayBuffer();
+
+    // Special handling for SVG - preserve as-is without conversion
+    if (file.type === "image/svg+xml") {
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      return `data:image/svg+xml;base64,${base64}`;
+    }
+
+    // For raster images (PNG, JPG, GIF), resize and convert to PNG
     const blob = new Blob([arrayBuffer], { type: file.type });
 
     // Use ImageBitmap API (available in Workers) for resizing

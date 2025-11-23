@@ -2,19 +2,19 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function ServerBadge({
-	className,
-	children,
+  className,
+  children,
 }: {
-	className?: string;
-	children: any;
+  className?: string;
+  children: React.ReactNode;
 }) {
-	return (
-		<Badge variant="outline" className={cn("gap-1.5", className)}>
-			<span
-				className="bg-purple-500 rounded-full size-1.5"
-				aria-hidden="true"
-			></span>
-			{children}
-		</Badge>
-	);
+  return (
+    <Badge className={cn("gap-1.5", className)} variant="outline">
+      <span
+        aria-hidden="true"
+        className="size-1.5 rounded-full bg-purple-500"
+      />
+      {children}
+    </Badge>
+  );
 }
