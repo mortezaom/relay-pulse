@@ -7,22 +7,22 @@
 // import { services, monitoringResults } from "@/db/schema";
 // import { eq } from "drizzle-orm";
 
-export interface MonitoringResult {
+export type MonitoringResult = {
   serviceId: number;
   status: "up" | "down" | "timeout" | "error";
   responseTime?: number;
   statusCode?: number;
   errorMessage?: string;
   timestamp: string;
-}
+};
 
-export interface ServiceConfig {
+export type ServiceConfig = {
   id: number;
   name: string;
   address: string;
   type: "http" | "https" | "tcp";
   port: number;
-}
+};
 
 /**
  * Main monitoring function - checks a single service
@@ -67,7 +67,7 @@ async function monitorHttpService(
 
   try {
     const controller = new AbortController();
-    const timeoutMs = 30000; // 30 seconds
+    const timeoutMs = 30_000; // 30 seconds
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
@@ -86,7 +86,10 @@ async function monitorHttpService(
 
       return {
         serviceId: service.id,
-        status: response.ok || response.status === 301 || response.status === 302 ? "up" : "down",
+        status:
+          response.ok || response.status === 301 || response.status === 302
+            ? "up"
+            : "down",
         responseTime,
         statusCode: response.status,
         timestamp: new Date().toISOString(),
@@ -120,10 +123,10 @@ async function monitorHttpService(
 
 /**
  * Monitor TCP services via external TCP checker service
- * 
+ *
  * TCP monitoring requires socket connections which are not available in Cloudflare Workers free tier.
  * We use an external Go-based service that can perform TCP checks and return results.
- * 
+ *
  * External Service: https://github.com/mortezaom/relay-pulse-tcp-checker
  */
 async function monitorTcpService(
@@ -140,7 +143,8 @@ async function monitorTcpService(
       return {
         serviceId: service.id,
         status: "error",
-        errorMessage: "TCP checker service not configured. Please set TCP checker URL in Settings.",
+        errorMessage:
+          "TCP checker service not configured. Please set TCP checker URL in Settings.",
         timestamp: new Date().toISOString(),
       };
     }
@@ -155,16 +159,18 @@ async function monitorTcpService(
       body: JSON.stringify({
         host: service.address,
         port: service.port,
-        timeout: 30000, // 30 seconds
+        timeout: 30_000, // 30 seconds
       }),
-      signal: AbortSignal.timeout(35000), // 35 second timeout for the request itself
+      signal: AbortSignal.timeout(35_000), // 35 second timeout for the request itself
     });
 
     if (!response.ok) {
-      throw new Error(`TCP checker returned ${response.status}: ${response.statusText}`);
+      throw new Error(
+        `TCP checker returned ${response.status}: ${response.statusText}`
+      );
     }
 
-    const result = await response.json() as TcpCheckResponse;
+    const result = (await response.json()) as TcpCheckResponse;
     const responseTime = Date.now() - startTime;
 
     return {
@@ -190,7 +196,9 @@ async function monitorTcpService(
 async function getTcpCheckerUrl(env: CloudflareEnv): Promise<string | null> {
   try {
     const settingsData = await env.RELAY_PULSE_KV.get("settings:global");
-    if (!settingsData) return null;
+    if (!settingsData) {
+      return null;
+    }
 
     const settings = JSON.parse(settingsData) as { tcpCheckerUrl?: string };
     return settings.tcpCheckerUrl || null;
@@ -203,13 +211,13 @@ async function getTcpCheckerUrl(env: CloudflareEnv): Promise<string | null> {
 /**
  * Response format from external TCP checker service
  */
-interface TcpCheckResponse {
-  reachable: boolean;      // true if port is open and responding
-  responseTime?: number;   // time in milliseconds
-  error?: string;          // error message if check failed
-  host: string;            // echoed back for verification
-  port: number;            // echoed back for verification
-}
+type TcpCheckResponse = {
+  reachable: boolean; // true if port is open and responding
+  responseTime?: number; // time in milliseconds
+  error?: string; // error message if check failed
+  host: string; // echoed back for verification
+  port: number; // echoed back for verification
+};
 
 /**
  * Save monitoring result to database
@@ -251,7 +259,10 @@ export async function handleIncidentManagement(
     const { eq, and } = await import("drizzle-orm");
 
     const db = getWorkerDb(env.RELAY_PULSE_DB);
-    const isServiceDown = result.status === "down" || result.status === "error" || result.status === "timeout";
+    const isServiceDown =
+      result.status === "down" ||
+      result.status === "error" ||
+      result.status === "timeout";
 
     if (isServiceDown) {
       // Check if there's already an ongoing incident
@@ -273,7 +284,8 @@ export async function handleIncidentManagement(
           startTime: result.timestamp,
           status: "ongoing",
           title: `Service Down - Check #${Math.random().toString(36).substr(2, 9)}`,
-          description: result.errorMessage || `Service returned status: ${result.status}`,
+          description:
+            result.errorMessage || `Service returned status: ${result.status}`,
         });
         console.log(`Created incident for service ${result.serviceId}`);
       }
@@ -298,7 +310,9 @@ export async function handleIncidentManagement(
           })
           .where(eq(incidents.id, incident.id));
 
-        console.log(`Resolved incident ${incident.id} for service ${result.serviceId}`);
+        console.log(
+          `Resolved incident ${incident.id} for service ${result.serviceId}`
+        );
       }
     }
   } catch (error) {
@@ -310,9 +324,11 @@ export async function handleIncidentManagement(
 /**
  * TODO: Send notifications based on monitoring results
  */
+
+// biome-ignore lint/suspicious/useAwait: Waiting for TODO implementation
 export async function handleNotifications(
-  result: MonitoringResult,
-  env: CloudflareEnv
+  result: MonitoringResult
+  // env: CloudflareEnv
 ): Promise<void> {
   // TODO: Implement notification logic
   // 1. Get notification settings for the service
@@ -326,8 +342,8 @@ export async function handleNotifications(
 }
 
 // Type definitions for Cloudflare Workers environment
-interface CloudflareEnv {
+type CloudflareEnv = {
   RELAY_PULSE_DB: D1Database;
   RELAY_PULSE_KV: KVNamespace;
   RELAY_PULSE_BUCKET: R2Bucket;
-}
+};

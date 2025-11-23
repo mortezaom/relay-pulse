@@ -1,27 +1,30 @@
 /**
  * Analytics and statistics utilities for monitoring data
  */
+/** biome-ignore-all lint/correctness/noUnusedVariables: waiting for TODO implementation */
+/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: waiting for TODO implementation */
+/** biome-ignore-all lint/suspicious/useAwait: waiting for TODO implementation */
 
 // TODO: Define analytics types
-export interface UptimeStats {
+export type UptimeStats = {
   period: string;
   uptime: number;
   totalChecks: number;
   successfulChecks: number;
   averageResponseTime: number;
   incidents: number;
-}
+};
 
-export interface ResponseTimeStats {
+export type ResponseTimeStats = {
   average: number;
   min: number;
   max: number;
   p50: number;
   p95: number;
   p99: number;
-}
+};
 
-export interface ServiceAnalytics {
+export type ServiceAnalytics = {
   serviceId: number;
   serviceName: string;
   uptime24h: number;
@@ -30,7 +33,7 @@ export interface ServiceAnalytics {
   responseTime: ResponseTimeStats;
   recentIncidents: number;
   status: "up" | "down" | "degraded";
-}
+};
 
 /**
  * TODO: Calculate comprehensive uptime statistics
@@ -42,9 +45,9 @@ export async function calculateUptimeStats(
 ): Promise<UptimeStats> {
   // TODO: Implement comprehensive stats calculation
   // const database = drizzle(db);
-  // 
+  //
   // const since = getPeriodStartDate(period);
-  // 
+  //
   // const results = await database
   //   .select()
   //   .from(monitoringResults)
@@ -91,9 +94,9 @@ export async function calculateResponseTimeStats(
 ): Promise<ResponseTimeStats> {
   // TODO: Implement response time analytics
   // const database = drizzle(db);
-  // 
+  //
   // const since = getPeriodStartDate(period);
-  // 
+  //
   // const results = await database
   //   .select({
   //     responseTime: monitoringResults.responseTime
@@ -152,7 +155,7 @@ export async function generateServiceAnalytics(
 ): Promise<ServiceAnalytics> {
   // TODO: Implement comprehensive analytics
   // const database = drizzle(db);
-  // 
+  //
   // // Get service info
   // const service = await database
   //   .select()
@@ -205,21 +208,29 @@ export async function getChartData(
 ): Promise<ChartDataPoint[]> {
   // TODO: Implement chart data aggregation
   // This should return data points for time series charts
-  // 
+  //
   // const database = drizzle(db);
   // const since = getPeriodStartDate(period);
-  // 
+  //
   // // Group data by time intervals (hourly for 24h, daily for 7d/30d)
   // const interval = period === "24h" ? "1 hour" : "1 day";
-  // 
+  //
   // // This would require more complex SQL aggregation
   // // For now, return mock data structure
 
   // Placeholder implementation
   const mockData: ChartDataPoint[] = [];
   const now = new Date();
-  const hours = period === "24h" ? 24 : period === "7d" ? 7 * 24 : 30 * 24;
-  
+  let hours: number;
+
+  if (period === "24h") {
+    hours = 24;
+  } else if (period === "7d") {
+    hours = 7 * 24;
+  } else {
+    hours = 30 * 24;
+  }
+
   for (let i = hours; i >= 0; i--) {
     const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
     mockData.push({
@@ -242,7 +253,7 @@ export async function generateStatusPageSummary(
   // 2. Calculate overall system health
   // 3. Get recent incidents
   // 4. Generate summary metrics
-  
+
   return {
     overallStatus: "operational",
     totalServices: 0,
@@ -255,7 +266,6 @@ export async function generateStatusPageSummary(
 }
 
 // TODO: Helper functions
-
 function getPeriodStartDate(period: string): Date {
   const now = new Date();
   switch (period) {
@@ -278,27 +288,36 @@ function getPercentile(sortedArray: number[], percentile: number): number {
   const index = (percentile / 100) * (sortedArray.length - 1);
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  
+
   if (lower === upper) {
     return sortedArray[lower];
   }
-  
+
   const weight = index - lower;
   return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
 }
 
-// TODO: Type definitions
-export interface ChartDataPoint {
+export type ChartDataPoint = {
   timestamp: string;
   value: number;
-}
+};
 
-export interface StatusPageSummary {
+export type StatusIncidentSummary = {
+  id: string;
+  serviceId: number;
+  title: string;
+  status: "open" | "resolved";
+  impact: "none" | "minor" | "major";
+  startedAt: string;
+  resolvedAt?: string | null;
+};
+
+export type StatusPageSummary = {
   overallStatus: "operational" | "degraded" | "outage";
   totalServices: number;
   upServices: number;
   downServices: number;
   degradedServices: number;
-  recentIncidents: any[];
+  recentIncidents: StatusIncidentSummary[];
   systemUptime: number;
-}
+};

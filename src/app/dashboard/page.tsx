@@ -7,38 +7,38 @@ import { getBrandingData } from "@/data/branding-storage";
 import { getGlobalSettings } from "@/lib/settings";
 
 export default async function Dashboard() {
-	const env = getCloudflareContext().env;
-	const data = await getBrandingData(env);
-	const settings = await getGlobalSettings(env);
+  const env = getCloudflareContext().env;
+  const data = await getBrandingData(env);
+  const settings = await getGlobalSettings(env);
 
-	return (
-		<div className="space-y-8">
-			<div>
-				<h1 className="font-bold text-3xl tracking-tight">Dashboard</h1>
-				<p className="mt-2 text-muted-foreground">
-					Manage your services and branding settings
-				</p>
-			</div>
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-bold text-3xl tracking-tight">Dashboard</h1>
+        <p className="mt-2 text-muted-foreground">
+          Manage your services and branding settings
+        </p>
+      </div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Branding Details</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<BrandingForm data={data} />
-				</CardContent>
-			</Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Branding Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <BrandingForm data={data} />
+        </CardContent>
+      </Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Settings</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<SettingsForm tcpCheckerUrl={settings.tcpCheckerUrl} />
-				</CardContent>
-			</Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SettingsForm tcpCheckerUrl={settings.tcpCheckerUrl} />
+        </CardContent>
+      </Card>
 
-			<ServicesList />
-		</div>
-	);
+      <ServicesList />
+    </div>
+  );
 }

@@ -2,18 +2,18 @@
  * Database utilities for monitoring operations
  */
 
+import { and, desc, eq, gte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { eq, and, gte, desc, lt } from "drizzle-orm";
-import { services, monitoringResults, incidents } from "@/db/schema";
-export interface ServiceStatus {
+import { incidents, monitoringResults, services } from "@/db/schema";
+export type ServiceStatus = {
   serviceId: number;
   status: "up" | "down" | "timeout" | "error";
   uptime: number;
   lastCheck?: string;
   responseTime?: number;
-}
+};
 
-export interface ServiceWithStatus {
+export type ServiceWithStatus = {
   id: number;
   name: string;
   address: string;
@@ -23,7 +23,7 @@ export interface ServiceWithStatus {
   uptime?: number;
   lastCheck?: string;
   responseTime?: number;
-}
+};
 
 /**
  * Get the latest monitoring status for a service
@@ -41,7 +41,9 @@ export async function getServiceStatus(
     .orderBy(desc(monitoringResults.timestamp))
     .limit(1);
 
-  if (latestResult.length === 0) return null;
+  if (latestResult.length === 0) {
+    return null;
+  }
 
   const result = latestResult[0];
   const uptime = await calculateUptime(serviceId, "24h", db);
@@ -82,6 +84,8 @@ export async function calculateUptime(
     case "90d":
       since.setDate(since.getDate() - 90);
       break;
+    default:
+      since.setDate(since.getDate() - 1);
   }
 
   const results = await database
@@ -94,9 +98,11 @@ export async function calculateUptime(
       )
     );
 
-  if (results.length === 0) return 100;
+  if (results.length === 0) {
+    return 100;
+  }
 
-  const successfulChecks = results.filter(r => r.status === "up").length;
+  const successfulChecks = results.filter((r) => r.status === "up").length;
   return (successfulChecks / results.length) * 100;
 }
 
@@ -105,8 +111,8 @@ export async function calculateUptime(
  */
 export async function getMonitoringHistory(
   serviceId: number,
-  limit: number = 100,
-  db: D1Database
+  db: D1Database,
+  limit = 100
 ): Promise<MonitoringResult[]> {
   const database = drizzle(db);
 
@@ -117,7 +123,7 @@ export async function getMonitoringHistory(
     .orderBy(desc(monitoringResults.timestamp))
     .limit(limit);
 
-  return results.map(r => ({
+  return results.map((r) => ({
     id: r.id,
     serviceId: r.serviceId,
     timestamp: r.timestamp,
@@ -131,7 +137,9 @@ export async function getMonitoringHistory(
 /**
  * Get all services with their current status
  */
-export async function getServicesWithStatus(db: D1Database): Promise<ServiceWithStatus[]> {
+export async function getServicesWithStatus(
+  db: D1Database
+): Promise<ServiceWithStatus[]> {
   const database = drizzle(db);
 
   const allServices = await database.select().from(services);
@@ -160,7 +168,9 @@ export async function getActiveIncidents(
   serviceId?: number,
   db?: D1Database
 ): Promise<Incident[]> {
-  if (!db) return [];
+  if (!db) {
+    return [];
+  }
 
   const database = drizzle(db);
 
@@ -169,14 +179,17 @@ export async function getActiveIncidents(
     .from(incidents)
     .where(
       serviceId
-        ? and(eq(incidents.serviceId, serviceId), eq(incidents.status, "ongoing"))
+        ? and(
+            eq(incidents.serviceId, serviceId),
+            eq(incidents.status, "ongoing")
+          )
         : eq(incidents.status, "ongoing")
     )
     .orderBy(desc(incidents.startTime));
 
   const results = await query;
 
-  return results.map(r => ({
+  return results.map((r) => ({
     id: r.id,
     serviceId: r.serviceId,
     startTime: r.startTime,
@@ -218,10 +231,7 @@ export async function createIncident(
     endTime: null,
   };
 
-  const result = await database
-    .insert(incidents)
-    .values(incident)
-    .returning();
+  const result = await database.insert(incidents).values(incident).returning();
 
   return {
     id: result[0].id,
@@ -253,7 +263,7 @@ export async function resolveIncident(
 }
 
 // TODO: Define types (these should be moved to a shared types file)
-interface MonitoringResult {
+type MonitoringResult = {
   id?: number;
   serviceId: number;
   timestamp: string;
@@ -261,9 +271,9 @@ interface MonitoringResult {
   responseTime?: number;
   statusCode?: number;
   errorMessage?: string;
-}
+};
 
-interface Incident {
+type Incident = {
   id: number;
   serviceId: number;
   startTime: string;
@@ -271,4 +281,4 @@ interface Incident {
   status: "ongoing" | "resolved";
   title: string;
   description?: string;
-}
+};

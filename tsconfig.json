@@ -30,7 +30,8 @@
     "types": [
       "./worker-configuration.d.ts",
       "node"
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "worker-configuration.d.ts",

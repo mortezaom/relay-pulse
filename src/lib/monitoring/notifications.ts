@@ -3,21 +3,21 @@
  * All notification settings are managed through the dashboard and stored in KV
  */
 
-export interface NotificationConfig {
+export type NotificationConfig = {
   serviceId: number;
   appriseUrl: string; // User-configured Apprise API endpoint
   enabled: boolean;
   alertThreshold: number; // Number of failures before sending alert
-}
+};
 
-export interface NotificationPayload {
+export type NotificationPayload = {
   serviceId: number;
   serviceName: string;
   status: "down" | "up" | "error" | "timeout";
   message: string;
   timestamp: string;
   incidentId?: number;
-}
+};
 
 /**
  * Send notification via Apprise API
@@ -27,13 +27,13 @@ export async function sendAppriseNotification(
   config: NotificationConfig,
   payload: NotificationPayload
 ): Promise<void> {
-  if (!config.enabled || !config.appriseUrl) {
+  if (!(config.enabled && config.appriseUrl)) {
     return;
   }
 
   try {
     const notificationBody = formatNotificationMessage(payload);
-    
+
     const response = await fetch(config.appriseUrl, {
       method: "POST",
       headers: {
@@ -48,7 +48,9 @@ export async function sendAppriseNotification(
     });
 
     if (!response.ok) {
-      throw new Error(`Apprise API returned ${response.status}: ${response.statusText}`);
+      throw new Error(
+        `Apprise API returned ${response.status}: ${response.statusText}`
+      );
     }
 
     console.log(`Notification sent for service ${payload.serviceName}`);
@@ -62,16 +64,16 @@ export async function sendAppriseNotification(
  */
 function formatNotificationMessage(payload: NotificationPayload): string {
   const timestamp = new Date(payload.timestamp).toLocaleString();
-  
+
   let message = `Service: ${payload.serviceName}\n`;
   message += `Status: ${payload.status.toUpperCase()}\n`;
   message += `Time: ${timestamp}\n`;
   message += `Message: ${payload.message}`;
-  
+
   if (payload.incidentId) {
     message += `\nIncident ID: #${payload.incidentId}`;
   }
-  
+
   return message;
 }
 
@@ -84,11 +86,11 @@ export async function getNotificationConfig(
 ): Promise<NotificationConfig | null> {
   try {
     const config = await env.RELAY_PULSE_KV.get(`notification:${serviceId}`);
-    
+
     if (!config) {
       return null;
     }
-    
+
     return JSON.parse(config) as NotificationConfig;
   } catch (error) {
     console.error("Failed to get notification config:", error);
@@ -129,8 +131,10 @@ export async function shouldSendAlert(
     // Get failure count from KV
     const failureCountKey = `failures:${serviceId}`;
     const failureCount = await env.RELAY_PULSE_KV.get(failureCountKey);
-    const currentFailures = failureCount ? parseInt(failureCount) : 0;
-    
+    const currentFailures = failureCount
+      ? Number.parseInt(failureCount, 10)
+      : 0;
+
     return currentFailures >= config.alertThreshold;
   } catch (error) {
     console.error("Failed to check alert threshold:", error);
@@ -148,11 +152,11 @@ export async function updateFailureCount(
 ): Promise<void> {
   try {
     const failureCountKey = `failures:${serviceId}`;
-    
+
     if (isFailure) {
       // Increment failure count
       const current = await env.RELAY_PULSE_KV.get(failureCountKey);
-      const count = current ? parseInt(current) + 1 : 1;
+      const count = current ? Number.parseInt(current, 10) + 1 : 1;
       await env.RELAY_PULSE_KV.put(failureCountKey, count.toString());
     } else {
       // Reset failure count on success
@@ -176,7 +180,7 @@ export async function sendServiceNotification(
 ): Promise<void> {
   try {
     const config = await getNotificationConfig(serviceId, env);
-    
+
     if (!config) {
       return; // No notification configured
     }
@@ -201,8 +205,8 @@ export async function sendServiceNotification(
   }
 }
 
-interface CloudflareEnv {
+type CloudflareEnv = {
   RELAY_PULSE_DB: D1Database;
   RELAY_PULSE_KV: KVNamespace;
   RELAY_PULSE_BUCKET: R2Bucket;
-}
+};

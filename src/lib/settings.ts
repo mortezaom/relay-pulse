@@ -4,28 +4,28 @@
  */
 
 // Settings interfaces
-export interface GlobalSettings {
+export type GlobalSettings = {
   appName: string;
   defaultMonitoringInterval: number; // minutes
   defaultAlertThreshold: number;
   maxServices: number;
   tcpCheckerUrl?: string; // External TCP checker service endpoint
-}
+};
 
-export interface MonitoringSettings {
+export type MonitoringSettings = {
   serviceId: number;
   enabled: boolean;
   interval: number; // minutes
   timeout: number; // seconds
   retryAttempts: number;
-}
+};
 
-export interface NotificationSettings {
+export type NotificationSettings = {
   serviceId: number;
   enabled: boolean;
   appriseUrl: string; // User's Apprise instance URL
   alertThreshold: number;
-}
+};
 
 // KV keys for different settings
 const KV_KEYS = {
@@ -38,7 +38,9 @@ const KV_KEYS = {
 /**
  * Global Settings Management
  */
-export async function getGlobalSettings(env: CloudflareEnv): Promise<GlobalSettings> {
+export async function getGlobalSettings(
+  env: CloudflareEnv
+): Promise<GlobalSettings> {
   try {
     const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.globalSettings);
 
@@ -86,7 +88,9 @@ export async function getMonitoringSettings(
   env: CloudflareEnv
 ): Promise<MonitoringSettings> {
   try {
-    const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.monitoring(serviceId));
+    const settings = await env.RELAY_PULSE_KV.get(
+      KV_KEYS.monitoring(serviceId)
+    );
 
     if (settings) {
       return JSON.parse(settings);
@@ -135,7 +139,9 @@ export async function getNotificationSettings(
   env: CloudflareEnv
 ): Promise<NotificationSettings | null> {
   try {
-    const settings = await env.RELAY_PULSE_KV.get(KV_KEYS.notification(serviceId));
+    const settings = await env.RELAY_PULSE_KV.get(
+      KV_KEYS.notification(serviceId)
+    );
 
     if (settings) {
       return JSON.parse(settings);
@@ -182,7 +188,7 @@ export async function getFailureCount(
 ): Promise<number> {
   try {
     const count = await env.RELAY_PULSE_KV.get(KV_KEYS.failures(serviceId));
-    return count ? parseInt(count) : 0;
+    return count ? Number.parseInt(count, 10) : 0;
   } catch (error) {
     console.error("Failed to get failure count:", error);
     return 0;
@@ -196,7 +202,10 @@ export async function incrementFailureCount(
   try {
     const current = await getFailureCount(serviceId, env);
     const newCount = current + 1;
-    await env.RELAY_PULSE_KV.put(KV_KEYS.failures(serviceId), newCount.toString());
+    await env.RELAY_PULSE_KV.put(
+      KV_KEYS.failures(serviceId),
+      newCount.toString()
+    );
     return newCount;
   } catch (error) {
     console.error("Failed to increment failure count:", error);
@@ -237,17 +246,25 @@ export async function deleteAllServiceSettings(
  * Get all services with their settings
  */
 export async function getAllServicesWithSettings(
-  services: Array<{ id: number; name: string; address: string; type: string; port: number }>,
+  services: Array<{
+    id: number;
+    name: string;
+    address: string;
+    type: string;
+    port: number;
+  }>,
   env: CloudflareEnv
-): Promise<Array<{
-  id: number;
-  name: string;
-  address: string;
-  type: string;
-  port: number;
-  monitoring: MonitoringSettings;
-  notification: NotificationSettings | null;
-}>> {
+): Promise<
+  Array<{
+    id: number;
+    name: string;
+    address: string;
+    type: string;
+    port: number;
+    monitoring: MonitoringSettings;
+    notification: NotificationSettings | null;
+  }>
+> {
   try {
     const servicesWithSettings = await Promise.all(
       services.map(async (service) => {
@@ -267,7 +284,7 @@ export async function getAllServicesWithSettings(
     return servicesWithSettings;
   } catch (error) {
     console.error("Failed to get services with settings:", error);
-    return services.map(service => ({
+    return services.map((service) => ({
       ...service,
       monitoring: {
         serviceId: service.id,
@@ -281,8 +298,8 @@ export async function getAllServicesWithSettings(
   }
 }
 
-interface CloudflareEnv {
+type CloudflareEnv = {
   RELAY_PULSE_DB: D1Database;
   RELAY_PULSE_KV: KVNamespace;
   RELAY_PULSE_BUCKET: R2Bucket;
-}
+};

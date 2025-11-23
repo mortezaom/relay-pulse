@@ -5,29 +5,32 @@
 
 import { getWorkerDb } from "@/db/index";
 import { services } from "@/db/schema";
-import { monitorService, saveMonitoringResult, handleIncidentManagement } from "./monitor";
 import { sendServiceNotification } from "@/lib/monitoring/notifications";
 import {
   getMonitoringSettings,
   getNotificationSettings,
-  getFailureCount,
   incrementFailureCount,
-  resetFailureCount
+  resetFailureCount,
 } from "@/lib/settings";
+import {
+  handleIncidentManagement,
+  monitorService,
+  saveMonitoringResult,
+} from "./monitor";
 
-interface CloudflareEnv {
+type CloudflareEnv = {
   RELAY_PULSE_DB: D1Database;
   RELAY_PULSE_KV: KVNamespace;
   RELAY_PULSE_BUCKET: R2Bucket;
-}
+};
 
 /**
  * Main scheduled handler - runs every 5 minutes or 2 AM daily
  */
 export async function handleScheduled(
-  event: ScheduledEvent,
+  _: ScheduledEvent,
   env: CloudflareEnv,
-  ctx: ExecutionContext
+  __: ExecutionContext
 ): Promise<void> {
   console.log("Starting scheduled task");
 
@@ -47,7 +50,7 @@ export async function handleScheduled(
       const activeServices = await getActiveServices(env);
 
       // Monitor all services in parallel
-      const monitoringPromises = activeServices.map(service =>
+      const monitoringPromises = activeServices.map((service) =>
         monitorServiceWithHandling(service, env)
       );
 
@@ -70,8 +73,8 @@ async function getActiveServices(env: CloudflareEnv): Promise<ServiceConfig[]> {
     const allServices = await db.select().from(services);
 
     // Filter services that need monitoring now
-    const activeServices = [];
-    const now = new Date().getTime();
+    const activeServices: ServiceConfig[] = [];
+    const now = Date.now();
 
     for (const service of allServices) {
       const settings = await getMonitoringSettings(service.id, env);
@@ -85,7 +88,7 @@ async function getActiveServices(env: CloudflareEnv): Promise<ServiceConfig[]> {
       const lastCheckStr = await env.RELAY_PULSE_KV.get(lastCheckKey);
 
       if (lastCheckStr) {
-        const lastCheck = parseInt(lastCheckStr);
+        const lastCheck = Number.parseInt(lastCheckStr, 10);
         const intervalMs = settings.interval * 60 * 1000; // Convert minutes to milliseconds
 
         if (now - lastCheck < intervalMs) {
@@ -119,7 +122,7 @@ async function monitorServiceWithHandling(
 ): Promise<void> {
   try {
     // Get monitoring settings
-    const settings = await getMonitoringSettings(service.id, env);
+    // const settings = await getMonitoringSettings(service.id, env);
 
     // Monitor the service
     const result = await monitorService(service, env);
@@ -140,13 +143,20 @@ async function monitorServiceWithHandling(
       const failureCount = await incrementFailureCount(service.id, env);
 
       // Check if we should send notification
-      const notificationSettings = await getNotificationSettings(service.id, env);
-      if (notificationSettings && failureCount >= notificationSettings.alertThreshold) {
+      const notificationSettings = await getNotificationSettings(
+        service.id,
+        env
+      );
+      if (
+        notificationSettings &&
+        failureCount >= notificationSettings.alertThreshold
+      ) {
         await sendServiceNotification(
           service.id,
           service.name,
           result.status,
-          result.errorMessage || `Service check failed with status: ${result.status}`,
+          result.errorMessage ||
+            `Service check failed with status: ${result.status}`,
           env
         );
       }
@@ -158,7 +168,9 @@ async function monitorServiceWithHandling(
     // Handle incident management
     await handleIncidentManagement(result, env);
 
-    console.log(`Monitored service: ${service.name} - Status: ${result.status}`);
+    console.log(
+      `Monitored service: ${service.name} - Status: ${result.status}`
+    );
   } catch (error) {
     console.error(`Error monitoring service ${service.name}:`, error);
   }
@@ -185,7 +197,10 @@ export async function healthCheck(env: CloudflareEnv): Promise<{
     const activeServices = await getActiveServices(env);
 
     // Store last run timestamp
-    await env.RELAY_PULSE_KV.put("monitoring:last-run", new Date().toISOString());
+    await env.RELAY_PULSE_KV.put(
+      "monitoring:last-run",
+      new Date().toISOString()
+    );
 
     return {
       status: "healthy",
@@ -228,17 +243,21 @@ export async function cleanupOldData(env: CloudflareEnv): Promise<void> {
 }
 
 // Types
-interface ServiceConfig {
+type ServiceConfig = {
   id: number;
   name: string;
   address: string;
   type: "http" | "https" | "tcp";
   port: number;
-}
+};
 
 // Worker export for Cloudflare Workers
 export default {
-  async scheduled(event: ScheduledEvent, env: CloudflareEnv, ctx: ExecutionContext) {
-    return handleScheduled(event, env, ctx);
+  async scheduled(
+    event: ScheduledEvent,
+    env: CloudflareEnv,
+    ctx: ExecutionContext
+  ) {
+    await handleScheduled(event, env, ctx);
   },
 };
