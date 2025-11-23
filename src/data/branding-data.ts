@@ -8,5 +8,7 @@ export const brandingSchema = z.object({
 export type BrandingSchemaType = z.infer<typeof brandingSchema>;
 
 export type BrandingDataType = BrandingSchemaType & {
+  // Base64 data URI (e.g., "data:image/png;base64,...")
+  // Image is automatically resized to max 200x200px
   imageUrl: string | null;
 };

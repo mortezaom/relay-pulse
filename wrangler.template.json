@@ -20,12 +20,6 @@
       "id": null
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "RELAY_PULSE_BUCKET",
-      "bucket_name": "relay-pulse-assets"
-    }
-  ],
   "d1_databases": [
     {
       "binding": "RELAY_PULSE_DB",

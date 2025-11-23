@@ -5,7 +5,6 @@ const crypto = require("node:crypto");
 
 const DB_NAME = "relay-pulse-db";
 const KV_NAME = "RELAY_PULSE_KV";
-const R2_NAME = "relay-pulse-assets";
 
 // --- Auth Check ---
 if (!(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ACCOUNT_ID)) {
@@ -68,12 +67,6 @@ if (!kvId) {
   run(`npx wrangler kv:namespace create ${KV_NAME}`);
   const newJson = run("npx wrangler kv:namespace list --json");
   kvId = JSON.parse(newJson).find((kv) => kv.title === KV_NAME).id;
-}
-
-const r2Json = run("npx wrangler r2 bucket list --json") || "[]";
-if (!JSON.parse(r2Json).some((b) => b.name === R2_NAME)) {
-  console.log(`🔧 Creating R2: ${R2_NAME}`);
-  run(`npx wrangler r2 bucket create ${R2_NAME}`);
 }
 
 console.log("📝 Writing wrangler.json...");

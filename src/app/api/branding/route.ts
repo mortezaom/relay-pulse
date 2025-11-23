@@ -3,10 +3,9 @@ import type { NextRequest } from "next/server";
 import { prettifyError } from "zod/v4-mini";
 import { type BrandingDataType, brandingSchema } from "@/data/branding-data";
 import {
-  convertFileKeyToUrl,
   getBrandingData,
+  processImageToBase64,
   saveBrandingData,
-  saveFileToBucket,
 } from "@/data/branding-storage";
 import { errorResponse, successResponse } from "@/lib/responses";
 
@@ -32,8 +31,8 @@ export async function POST(req: Request) {
     const brandingData: BrandingDataType = { ...body.data, imageUrl: null };
 
     if (file) {
-      const imageKey = await saveFileToBucket(cfEnv, file);
-      brandingData.imageUrl = imageKey ? convertFileKeyToUrl(imageKey) : null;
+      const base64Image = await processImageToBase64(file);
+      brandingData.imageUrl = base64Image;
     }
     if (!brandingData.imageUrl) {
       const existingData = await getBrandingData(cfEnv);

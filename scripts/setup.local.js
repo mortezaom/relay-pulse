@@ -6,7 +6,6 @@ const crypto = require("node:crypto");
 // --- Configuration ---
 const DB_NAME = "relay-pulse-db";
 const KV_NAME = "RELAY_PULSE_KV";
-const R2_NAME = "relay-pulse-assets";
 
 const ENV_LOCAL_PATH = path.join(__dirname, "../.env.local");
 const DEV_VARS_PATH = path.join(__dirname, "../.dev.vars");
@@ -100,15 +99,6 @@ function main() {
     run(`pnpm wrangler kv namespace create ${KV_NAME}`);
     const newList = JSON.parse(run("pnpm wrangler kv namespace list") || "[]");
     kvId = newList.find((d) => d.title === KV_NAME).id;
-  }
-
-  // --- R2 ---
-  const r2List = JSON.parse(run("pnpm wrangler r2 bucket list --json") || "[]");
-  if (r2List.some((b) => b.name === R2_NAME)) {
-    console.log("   ✅ R2 Found");
-  } else {
-    console.log(`   🔧 Creating R2 '${R2_NAME}'...`);
-    run(`pnpm wrangler r2 bucket create ${R2_NAME}`);
   }
 
   // 3. GENERATE WRANGLER.JSON
