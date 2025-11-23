@@ -5,9 +5,10 @@
 
 import { getWorkerDb } from "@/db/index";
 import { services } from "@/db/schema";
+import { getJwtSecret } from "@/lib/jwt-secret";
+import { sendServiceNotifications } from "@/lib/notifications";
 import {
   getMonitoringSettings,
-  getNotificationSettings,
   incrementFailureCount,
   resetFailureCount,
 } from "@/lib/settings";
@@ -16,13 +17,6 @@ import {
   monitorService,
   saveMonitoringResult,
 } from "./monitor";
-import { sendServiceNotification } from "./notifications";
-
-type CloudflareEnv = {
-  RELAY_PULSE_DB: D1Database;
-  RELAY_PULSE_KV: KVNamespace;
-  RELAY_PULSE_BUCKET: R2Bucket;
-};
 
 type ServiceConfig = {
   id: number;
@@ -133,10 +127,6 @@ async function monitorServiceWithHandling(
   env: CloudflareEnv
 ): Promise<void> {
   try {
-    // TODO: Use service-specific settings if needed
-    // Get monitoring settings
-    // const settings = await getMonitoringSettings(service.id, env);
-
     // Monitor the service
     const result = await monitorService(service, env);
 
@@ -149,37 +139,41 @@ async function monitorServiceWithHandling(
       Date.now().toString()
     );
 
-    // Handle failure counting and notifications
+    // Handle failure counting
     const isFailure = result.status !== "up";
 
     if (isFailure) {
-      const failureCount = await incrementFailureCount(service.id, env);
-
-      // Check if we should send notification
-      const notificationSettings = await getNotificationSettings(
-        service.id,
-        env
-      );
-      if (
-        notificationSettings &&
-        failureCount >= notificationSettings.alertThreshold
-      ) {
-        await sendServiceNotification(
-          service.id,
-          service.name,
-          result.status,
-          result.errorMessage ||
-            `Service check failed with status: ${result.status}`,
-          env
-        );
-      }
+      await incrementFailureCount(service.id, env);
     } else {
-      // Reset failure count on success
       await resetFailureCount(service.id, env);
     }
 
     // Handle incident management
     await handleIncidentManagement(result, env);
+
+    // Send notifications through the unified notification system
+    try {
+      const jwtSecret = await getJwtSecret();
+      await sendServiceNotifications(
+        service.id,
+        service.name,
+        result.status,
+        result.errorMessage ||
+          `Service check failed with status: ${result.status}`,
+        env as CloudflareEnv,
+        jwtSecret,
+        {
+          responseTime: result.responseTime,
+          statusCode: result.statusCode,
+        }
+      );
+    } catch (notificationError) {
+      // Don't fail monitoring if notifications fail
+      console.error(
+        `Failed to send notifications for service ${service.name}:`,
+        notificationError
+      );
+    }
 
     console.log(
       `Monitored service: ${service.name} - Status: ${result.status}`

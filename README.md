@@ -78,87 +78,121 @@ To run Relay Pulse locally:
 
 > **Note**: All user settings (monitoring intervals, notifications, etc.) are managed through the dashboard and stored in Cloudflare KV - no local configuration files needed!
 
-## 📋 Development TODO List
+## 📋 Features Status
 
-The following TODO items are marked throughout the codebase to guide development:
-
-### Core Monitoring Engine
-- [ ] **Implement monitoring workers** (`src/workers/monitor.ts`)
-  - HTTP/HTTPS service monitoring
-  - TCP port monitoring
+### ✅ Core Monitoring (Completed)
+- ✅ **Unified monitoring system** (`src/lib/monitoring/`)
+  - HTTP/HTTPS service monitoring with timeout handling
+  - TCP port monitoring via external checker
   - Response time tracking
-  - Error handling and timeouts
+  - Error handling and incident management
+  - Automated cron-based scheduling (every 5 minutes)
+  - Daily data cleanup (2 AM UTC)
 
-- [ ] **Scheduler implementation** (`src/workers/scheduler.ts`)
-  - Cron job configuration
-  - Service monitoring orchestration
-  - Data cleanup routines
+### ✅ Notification System (Completed)
+- ✅ **Multi-provider notification system** (`src/lib/notifications/`)
+  - Telegram, Discord, Slack
+  - Email (via Resend API)
+  - Ntfy, Gotify
+  - Apprise (legacy support)
+  - Channel-based configuration with encryption
+  - Per-service notification mappings
+  - Alert thresholds and recovery notifications
 
-### Database & Storage
-- [ ] **Complete database schema** (`src/db/schema.ts`)
-  - Monitoring results table
-  - Incidents tracking
-  - Notification settings
+### ✅ Database & Storage (Completed)
+- ✅ **Schema and operations** (`src/db/`)
+  - Services table
+  - Monitoring results tracking
+  - Incidents management
+  - KV-based settings storage
 
-- [ ] **Monitoring utilities** (`src/lib/monitoring/`)
-  - Database operations (`database.ts`)
-  - Notification system (`notifications.ts`)
-  - Analytics and statistics (`analytics.ts`)
+### ✅ Dashboard Features (Completed)
+- ✅ **Service management**
+  - Full CRUD operations
+  - Real-time status display
+  - Uptime and response time metrics
+  - Notification channel configuration
 
-### Dashboard Features
-- [ ] **Services management** (`src/components/dashboard/services-list.tsx`)
-  - Add monitoring status columns
-  - Real-time status updates
-  - Response time display
-
-- [ ] **API enhancements** (`src/app/api/services/route.ts`)
-  - Include monitoring data in service responses
-  - Start monitoring for new services
-
-### Deployment Pipeline
-- [ ] **GitHub Actions** (`.github/workflows/deploy.yml`)
-  - Resource creation automation
+### ✅ Deployment (Completed)
+- ✅ **One-click deployment** (GitHub Actions)
+  - Automatic resource creation (D1, KV, R2)
   - Database migrations
-  - Health checks and rollbacks
+  - JWT secret management
+  - Health checks
 
-### Additional Features
-- [ ] Email notifications via Cloudflare Email Workers
-- [ ] Webhook notifications
-- [ ] Incident management system
-- [ ] Status page generation
-- [ ] Performance analytics and charts
+### 🚀 Future Enhancements
+- [ ] Advanced analytics dashboard with charts
+- [ ] Custom public status pages
+- [ ] Multi-region monitoring
+- [ ] Advanced incident timelines
+- [ ] API rate limiting
+- [ ] Webhook integrations
 
 ## 🏗️ Architecture
 
 Relay Pulse is built with modern web technologies optimized for edge computing:
 
-- **Frontend**: Next.js 14 with TypeScript
-- **Styling**: Tailwind CSS + Shadcn/ui components
+- **Frontend**: Next.js 15 with TypeScript and React 19
+- **Styling**: Tailwind CSS 4 + Shadcn/ui components
 - **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
-- **Storage**: Cloudflare KV + R2 for assets
+- **Storage**: Cloudflare KV (settings, channels) + R2 (assets)
 - **Runtime**: Cloudflare Workers (Edge Runtime)
-- **Monitoring**: Scheduled Workers with Cron Triggers
+- **Monitoring**: Unified worker with cron triggers (every 5 min)
+- **Deployment**: OpenNext for Next.js → Cloudflare Workers conversion
 
-## 🔧 Features in Development
+### Unified Worker Architecture
 
-### ✅ Completed
-- Service CRUD operations
-- Basic dashboard UI
-- Database schema foundation
-- Authentication system setup
+```
+Single Cloudflare Worker Deployment
+├── HTTP Handler (fetch) → Next.js App via OpenNext
+│   ├── Dashboard UI (/dashboard/*)
+│   ├── API Routes (/api/*)
+│   └── Public Status Page (/)
+│
+└── Cron Handler (scheduled) → Monitoring System
+    ├── Every 5 minutes: Service health checks
+    ├── Daily at 2 AM: Data cleanup
+    └── Uses: src/lib/monitoring/* + src/lib/notifications/*
+```
 
-### 🚧 In Progress
-- Core monitoring engine
-- Real-time status tracking
-- Notification system
-- Incident management
+All components share the same Cloudflare resources (D1, KV, R2), eliminating the need for separate worker deployments or complex coordination.
 
-### 📅 Planned
-- Advanced analytics
-- Multi-region monitoring
-- Custom status pages
-- API rate limiting
-- Performance optimizations
+## 🔧 Key Features
+
+### ✅ Monitoring
+- **Multi-protocol support**: HTTP, HTTPS, and TCP
+- **Configurable intervals**: Per-service monitoring frequency
+- **Response tracking**: Status codes, response times, error messages
+- **Incident management**: Automatic detection and resolution tracking
+- **Data retention**: 90-day history with automatic cleanup
+
+### ✅ Notifications
+- **7 notification providers**:
+  - 📧 **Email** (via Resend - 100 free/day, 3000/month)
+  - 💬 **Telegram** Bot
+  - 💬 **Discord** Webhooks
+  - 💬 **Slack** Webhooks
+  - 🔔 **Ntfy** (self-hosted or public)
+  - 🔔 **Gotify** (self-hosted)
+  - � **Apprise** (universal gateway)
+- **Encrypted credentials**: AES-256-GCM encryption
+- **Per-service configuration**: Different channels per service
+- **Alert thresholds**: Configurable failure counts
+- **Recovery notifications**: Optional "back online" alerts
+
+### ✅ Dashboard
+- **Real-time status**: Live service health at a glance
+- **Uptime metrics**: 24h, 7d, 30d, 90d calculations
+- **Service management**: Add, edit, delete services
+- **Notification channels**: Manage and test integrations
+- **Settings**: Global configuration, TCP checker URL
+- **Branding**: Custom logo, title, and alert messages
+
+### ✅ Deployment
+- **One-click setup**: GitHub Actions automation
+- **Zero configuration**: Resources auto-created
+- **Free tier friendly**: Optimized for Cloudflare free tier
+- **Global edge**: Deployed to Cloudflare's network
 
 ## 🤝 Contributing
 

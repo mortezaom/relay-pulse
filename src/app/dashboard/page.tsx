@@ -7,7 +7,7 @@ import { getBrandingData } from "@/data/branding-storage";
 import { getGlobalSettings } from "@/lib/settings";
 
 export default async function Dashboard() {
-  const env = getCloudflareContext().env;
+  const env = (await getCloudflareContext({ async: true })).env;
   const data = await getBrandingData(env);
   const settings = await getGlobalSettings(env);
 
