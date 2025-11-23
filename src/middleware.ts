@@ -46,7 +46,7 @@ const authPathMiddleware = async (req: NextRequest) => {
   return NextResponse.redirect(new URL("/", req.url));
 };
 
-export function proxy(req: NextRequest) {
+export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/auth")) {

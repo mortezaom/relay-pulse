@@ -17,7 +17,21 @@ const openNextWorkerPromise: Promise<{
     env: Env,
     ctx: ExecutionContext
   ) => Promise<unknown> | unknown;
-}> = import("../.open-next/worker.js").then((mod: any) => mod.default ?? mod);
+}> = import("../.open-next/worker.js").then((mod: unknown) => {
+  const worker = mod as { default?: typeof mod };
+  return (worker.default ?? mod) as {
+    fetch: (
+      request: Request,
+      env: Env,
+      ctx: ExecutionContext
+    ) => Promise<Response>;
+    scheduled?: (
+      event: ScheduledEvent,
+      env: Env,
+      ctx: ExecutionContext
+    ) => Promise<unknown> | unknown;
+  };
+});
 
 type Env = CloudflareEnv;
 

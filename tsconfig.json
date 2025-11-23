@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,26 +19,20 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "types": [
-      "./worker-configuration.d.ts",
-      "node"
-    ],
+    "types": ["./worker-configuration.d.ts", "node"],
     "strictNullChecks": true
   },
   "include": [
     "worker-configuration.d.ts",
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "*.ts",
+    "*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", "worker", ".open-next"]
 }

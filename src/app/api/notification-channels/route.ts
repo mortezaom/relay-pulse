@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Encrypt credentials
-    const jwtSecret = await getJwtSecret();
+    const jwtSecret = getJwtSecret();
     const encryptedCredentials = await encryptCredentials(
       credentials,
       jwtSecret

@@ -11,6 +11,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./worker-configuration.d.ts",
     "db:generate": "drizzle-kit generate",
+    "setup": "node scripts/setup.local.js",
     "db:migrate:local": "wrangler d1 migrations apply relay-pulse-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply relay-pulse-db --remote",
     "db:studio": "drizzle-kit studio"

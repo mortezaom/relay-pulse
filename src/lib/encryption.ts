@@ -7,8 +7,8 @@ export const hashPassword = (password: string) => bcrypt.hashSync(password, 10);
 export const comparePassword = (inPassword: string, hashedPassword: string) =>
   bcrypt.compareSync(inPassword, hashedPassword);
 
-export const generateJWTToken = async (data: object) => {
-  const secret = await getJwtSecret();
+export const generateJWTToken = (data: object) => {
+  const secret = getJwtSecret();
   const encodedKey = new TextEncoder().encode(secret);
 
   return new SignJWT({ ...data })
@@ -26,7 +26,7 @@ export async function verifyJWTToken(
   }
 
   try {
-    const secret = await getJwtSecret();
+    const secret = getJwtSecret();
     const encodedKey = new TextEncoder().encode(secret);
 
     const { payload } = await jwtVerify(token, encodedKey, {

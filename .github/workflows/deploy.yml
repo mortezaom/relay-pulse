@@ -1,145 +1,73 @@
-# Relay Pulse - One-Click Cloudflare Deployment
-# Users only need to add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to GitHub Secrets
-
-name: 🚀 Deploy to Cloudflare
+name: 🚀 Deploy Relay Pulse
 
 on:
   push:
-    branches: [main, master]
+    branches: [master]
   workflow_dispatch:
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
+  # Global auth for all steps
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 jobs:
   deploy:
-    name: 🚀 Deploy Relay Pulse
+    name: 🚀 Deploy
     runs-on: ubuntu-latest
     
     steps:
       - name: 📚 Checkout
         uses: actions/checkout@v4
 
-      - name: 📦 Setup Node.js
+      - name: 🛑 Check Credentials
+        if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
+        run: |
+          echo "❌ Error: Missing Cloudflare Credentials in GitHub Secrets"
+          exit 1
+
+      - name: 📦 Setup & Install
         uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+        with: { node-version: ${{ env.NODE_VERSION }} }
+      
+      - uses: pnpm/action-setup@v2
+        with: { version: latest }
+        
+      - run: pnpm install --frozen-lockfile
 
-      - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
-      - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🔧 Build application
-        run: pnpm build
-
-      - name: ⚙️ Create Cloudflare Resources
+      - name: 🔧 Build App
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CI: true
         run: |
-          echo "🔧 Creating Cloudflare resources (auto-managed)..."
-          
-          # Create KV namespace (if doesn't exist)
-          wrangler kv:namespace create "RELAY_PULSE_KV" --preview false || echo "KV namespace already exists"
-          
-          # Create D1 database (if doesn't exist)  
-          wrangler d1 create relay-pulse-db || echo "D1 database already exists"
-          
-          # Create R2 bucket (if doesn't exist)
-          wrangler r2 bucket create relay-pulse-assets || echo "R2 bucket already exists"
-          
-          echo "✅ Resources ready"
+          pnpm build
+          npx opennextjs-cloudflare build
 
-      - name: 🗄️ Run Database Migrations
+      - name: ⚙️ Setup Cloudflare (Resources & Secrets)
+        run: node scripts/setup-env.js
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: wrangler d1 migrations apply relay-pulse-db --remote
-
-      - name: 🔐 Setup JWT Secret
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Pass App Secrets to the script so it can upload them
+          RELAY_AUTH_EMAIL: ${{ secrets.RELAY_AUTH_EMAIL }}
+          RELAY_AUTH_SECRET: ${{ secrets.RELAY_AUTH_SECRET }}
           RELAY_JWT_SECRET: ${{ secrets.RELAY_JWT_SECRET }}
-        run: |
-          if [ -z "$RELAY_JWT_SECRET" ]; then
-            echo "⚠️ RELAY_JWT_SECRET not in GitHub Secrets"
-            echo "📝 Generating random secret for deployment"
-            JWT_SECRET=$(openssl rand -base64 32)
-            echo "::add-mask::$JWT_SECRET"
-          else
-            echo "✅ Using RELAY_JWT_SECRET from GitHub Secrets"
-            JWT_SECRET="$RELAY_JWT_SECRET"
-          fi
-          echo "$JWT_SECRET" | wrangler secret put RELAY_JWT_SECRET
 
-      - name: 🚀 Deploy Main Application
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm deploy
+      - name: 🗄️ Database Migrations
+        run: npx wrangler d1 migrations apply relay-pulse-db --remote
 
-      - name: ✅ Verify Deployment
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: 🚀 Deploy
+        run: npx opennextjs-cloudflare deploy
+
+      - name: ✅ Health Check
         run: |
-          echo "⏳ Waiting for deployment to propagate..."
-          sleep 10
+          echo "⏳ Waiting 15s for cold start..."
+          sleep 15
           
-          echo "🔍 Checking health endpoint..."
-          # Try to get the worker URL from wrangler
-          WORKER_URL=$(wrangler deployments list --name relay-pulse 2>/dev/null | grep -oP 'https://[^\s]+' | head -1 || echo "")
+          # Get URL dynamically
+          WORKER_URL=$(npx wrangler deployments list --name relay-pulse --json | jq -r '.[0].url' || echo "")
           
-          if [ -z "$WORKER_URL" ]; then
-            echo "⚠️ Could not determine worker URL, skipping health check"
-            echo "📝 Visit your Cloudflare dashboard to find the worker URL"
+          if [ -z "$WORKER_URL" ] || [ "$WORKER_URL" == "null" ]; then
+             echo "⚠️ Could not auto-detect URL. Check Cloudflare Dashboard."
           else
-            echo "📍 Worker URL: $WORKER_URL"
-            HEALTH_URL="$WORKER_URL/api/health"
-            
-            RESPONSE=$(curl -s -f "$HEALTH_URL" || echo "FAILED")
-            if [[ "$RESPONSE" == "FAILED" ]]; then
-              echo "❌ Health check failed - but deployment may still be successful"
-              echo "⏳ It may take a few moments for the worker to become available"
-              exit 0  # Don't fail the workflow
-            fi
-            
-            echo "✅ Health check passed!"
-            echo "$RESPONSE" | head -20
+             echo "📍 App deployed to: $WORKER_URL"
+             echo "🔍 Checking /api/health..."
+             curl -s -f "$WORKER_URL/api/health" || echo "Health check pending (normal for fresh deploy)"
           fi
-
-      - name: 📊 Deployment Summary
-        run: |
-          echo "✅ Deployment steps completed"
-          echo ""
-          echo "📋 What was deployed:"
-          echo "✅ Main application with integrated monitoring"
-          echo "✅ Cron triggers configured (5min checks + daily cleanup)"
-          echo "✅ Database migrations applied"
-          echo "✅ JWT secret configured"
-          echo ""
-
-      - name: ✅ Deployment Complete
-        run: |
-          echo "🎉 Relay Pulse deployed successfully!"
-          echo ""
-          echo "📋 What was deployed:"
-          echo "✅ Main application (dashboard & API)"
-          echo "✅ Integrated monitoring system with cron triggers"
-          echo "✅ Database migrations applied"
-          echo "✅ All Cloudflare resources created"
-          echo ""
-          echo "🔧 Monitoring Schedule:"
-          echo "  • Service checks: Every 5 minutes"
-          echo "  • Data cleanup: Daily at 2 AM UTC"
-          echo ""
-          echo "📋 Next steps:"
-          echo "1. Visit your deployed application"
-          echo "2. Add your first services to monitor"
-          echo "3. Configure notification channels (optional)"
-          echo "4. Check /api/health for system status"
-          echo ""
-          echo "🔗 Your Relay Pulse instance:"
-          echo "   Check Cloudflare dashboard for the worker URL"

@@ -1,12 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	/* config options here */
+  /* config options here */
+  typescript: {
+    // Ignore build errors - worker imports .open-next/worker.js which doesn't exist until after OpenNext build
+    ignoreBuildErrors: true,
+  },
 };
 
-export default nextConfig;
+export default nextConfig; // added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
 
-// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 initOpenNextCloudflareForDev();

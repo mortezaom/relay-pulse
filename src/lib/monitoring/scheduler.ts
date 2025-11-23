@@ -153,7 +153,7 @@ async function monitorServiceWithHandling(
 
     // Send notifications through the unified notification system
     try {
-      const jwtSecret = await getJwtSecret();
+      const jwtSecret = getJwtSecret();
       await sendServiceNotifications(
         service.id,
         service.name,

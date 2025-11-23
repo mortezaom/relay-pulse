@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["esnext"],
+    "types": ["../worker-configuration.d.ts"],
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.d.ts",
+    "../src/lib/**/*.ts",
+    "../src/db/**/*.ts"
+  ],
+  "exclude": ["node_modules", "../.next", "../.open-next"]
+}
