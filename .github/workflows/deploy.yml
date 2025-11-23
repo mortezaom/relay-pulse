@@ -26,14 +26,18 @@ jobs:
           echo "❌ Error: Missing Cloudflare Credentials in GitHub Secrets"
           exit 1
 
-      - name: 📦 Setup & Install
+      - name: 📦 Setup Node
         uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }} }
-      
-      - uses: pnpm/action-setup@v2
-        with: { version: latest }
-        
-      - run: pnpm install --frozen-lockfile
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: 📦 Install Dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: 🔧 Build App
         env:
@@ -45,8 +49,7 @@ jobs:
       - name: ⚙️ Setup Cloudflare (Resources & Secrets)
         run: node scripts/setup-env.js
         env:
-          # Pass App Secrets to the script so it can upload them
-          RELAY_AUTH_EMAIL: ${{ secrets.RELAY_AUTH_EMAIL }}
+          RELAY_AUTH_EMAIL: ${{ secrets.RELAY_AUTH_SECRET }}
           RELAY_AUTH_SECRET: ${{ secrets.RELAY_AUTH_SECRET }}
           RELAY_JWT_SECRET: ${{ secrets.RELAY_JWT_SECRET }}
 
