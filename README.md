@@ -35,7 +35,7 @@ Deploy Relay Pulse to your Cloudflare account with **zero configuration** - just
 4. **Deploy automatically**:
    - Push to `main` branch or manually trigger the "Deploy to Cloudflare" workflow
    - The GitHub Action automatically:
-     - ✅ Creates all required Cloudflare resources (KV, D1, R2)
+     - ✅ Creates all required Cloudflare resources (KV, D1)
      - ✅ Deploys the dashboard application
      - ✅ Deploys monitoring workers with cron triggers
      - ✅ Runs database migrations
@@ -115,7 +115,7 @@ To run Relay Pulse locally:
 
 ### ✅ Deployment (Completed)
 - ✅ **One-click deployment** (GitHub Actions)
-  - Automatic resource creation (D1, KV, R2)
+  - Automatic resource creation (D1, KV)
   - Database migrations
   - JWT secret management
   - Health checks
@@ -135,7 +135,7 @@ Relay Pulse is built with modern web technologies optimized for edge computing:
 - **Frontend**: Next.js 15 with TypeScript and React 19
 - **Styling**: Tailwind CSS 4 + Shadcn/ui components
 - **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
-- **Storage**: Cloudflare KV (settings, channels) + R2 (assets)
+- **Storage**: Cloudflare KV (settings, channels, logo as base64)
 - **Runtime**: Cloudflare Workers (Edge Runtime)
 - **Monitoring**: Unified worker with cron triggers (every 5 min)
 - **Deployment**: OpenNext for Next.js → Cloudflare Workers conversion
@@ -155,7 +155,7 @@ Single Cloudflare Worker Deployment
     └── Uses: src/lib/monitoring/* + src/lib/notifications/*
 ```
 
-All components share the same Cloudflare resources (D1, KV, R2), eliminating the need for separate worker deployments or complex coordination.
+All components share the same Cloudflare resources (D1, KV), eliminating the need for separate worker deployments or complex coordination.
 
 ## 🔧 Key Features
 

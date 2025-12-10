@@ -2,27 +2,64 @@ import type { BrandingDataType } from "./branding-data";
 
 export const KV_BRANDING_KEY = "branding-data";
 
-export const saveFileToBucket = async (
-  env: CloudflareEnv,
+const MAX_LOGO_SIZE = 200; // Max dimension (width/height) in pixels
+
+/**
+ * Processes and converts an image file to base64 data URI
+ * - SVG files: Preserved as-is (maintains scalability and small size)
+ * - Raster images (PNG/JPG/GIF): Resized to max 200x200px and converted to PNG
+ */
+export const processImageToBase64 = async (
   file: File
 ): Promise<string | null> => {
-  const rBucket = env.RELAY_PULSE_BUCKET;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
 
-  const filename = file.name || `upload-${Date.now()}`;
-  const contentType = file.type || "application/octet-stream";
+    // Special handling for SVG - preserve as-is without conversion
+    if (file.type === "image/svg+xml") {
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      return `data:image/svg+xml;base64,${base64}`;
+    }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const body = new Uint8Array(arrayBuffer);
+    // For raster images (PNG, JPG, GIF), resize and convert to PNG
+    const blob = new Blob([arrayBuffer], { type: file.type });
 
-  if (!rBucket) {
+    // Use ImageBitmap API (available in Workers) for resizing
+    const imageBitmap = await createImageBitmap(blob);
+
+    // Calculate new dimensions while maintaining aspect ratio
+    let { width, height } = imageBitmap;
+    if (width > MAX_LOGO_SIZE || height > MAX_LOGO_SIZE) {
+      const scale = Math.min(MAX_LOGO_SIZE / width, MAX_LOGO_SIZE / height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+
+    // Create canvas and draw resized image
+    const canvas = new OffscreenCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return null;
+    }
+
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+
+    // Convert to blob and then to base64
+    const resizedBlob = await canvas.convertToBlob({
+      type: "image/png",
+      quality: 0.9,
+    });
+
+    const resizedArrayBuffer = await resizedBlob.arrayBuffer();
+    const base64 = btoa(
+      String.fromCharCode(...new Uint8Array(resizedArrayBuffer))
+    );
+
+    return `data:image/png;base64,${base64}`;
+  } catch (error) {
+    console.error("Failed to process image:", error);
     return null;
   }
-
-  const r2Object = await rBucket.put(filename, body, {
-    httpMetadata: { contentType },
-  });
-
-  return r2Object.key;
 };
 
 export const saveBrandingData = async (
@@ -53,5 +90,3 @@ export const getBrandingData = async (
     return null;
   }
 };
-
-export const convertFileKeyToUrl = (key: string) => `/r2?key=${key}`;

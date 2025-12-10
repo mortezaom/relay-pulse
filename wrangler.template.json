@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "relay-pulse",
+  "main": "worker/index.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *", "0 2 * * *"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "RELAY_PULSE_KV",
+      "id": null
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "RELAY_PULSE_DB",
+      "database_name": "relay-pulse-db",
+      "database_id": null
+    }
+  ]
+}

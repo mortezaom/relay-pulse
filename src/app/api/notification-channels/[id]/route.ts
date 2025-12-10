@@ -141,7 +141,7 @@ export async function PATCH(
         );
       }
 
-      const jwtSecret = await getJwtSecret();
+      const jwtSecret = getJwtSecret();
       updates.credentials = await encryptCredentials(
         body.credentials,
         jwtSecret
