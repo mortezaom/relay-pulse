@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { BrandingDataType } from "@/data/branding-data";
 import { cn } from "@/lib/utils";
 import { LogoVector } from "./icons";
@@ -15,7 +14,14 @@ export function MainNav(props: {
       <div className="flex items-center space-x-4 lg:space-x-6">
         <a className="flex size-12 items-center justify-center" href="/">
           {props.bData?.imageUrl ? (
-            <Image alt="Logo" className="size-6" src={props.bData.imageUrl} />
+            // biome-ignore lint/performance/noImgElement: no-optimization needed
+            <img
+              alt="Logo"
+              className="size-6"
+              height="24"
+              src={props.bData.imageUrl}
+              width="24"
+            />
           ) : (
             <LogoVector className="size-6" />
           )}

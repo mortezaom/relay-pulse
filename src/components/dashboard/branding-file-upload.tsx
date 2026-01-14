@@ -12,7 +12,10 @@ export default function BrandingFileUpload({
   onFileChangeAction,
 }: {
   currentImage: string | null;
-  onFileChangeAction?: (file: File | null, previewUrl: string | null) => void;
+  onFileChangeAction?: (
+    file: File | "removed" | null,
+    previewUrl: string | null
+  ) => void;
 }) {
   const maxSizeMB = 0.5;
   const maxSize = maxSizeMB * 1024 * 1024;
@@ -51,7 +54,7 @@ export default function BrandingFileUpload({
       removeUploadedFile(files[0].id);
     }
     // Explicitly clear in parent
-    onFileChangeAction?.(null, null);
+    onFileChangeAction?.("removed", null);
     if (current) {
       setCurrent(null);
     }

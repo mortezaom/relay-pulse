@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   try {
     const cfEnv = getCloudflareContext().env;
     const formData = await req.formData();
-    const file = formData.get("image") as File | null;
+    const file = formData.get("image") as File | "removed" | null;
 
     // convert all fields to object except image fields
     const bodyFormData = Object.fromEntries(
@@ -30,11 +30,11 @@ export async function POST(req: Request) {
 
     const brandingData: BrandingDataType = { ...body.data, imageUrl: null };
 
-    if (file) {
+    if (file && file !== "removed") {
       const base64Image = await processImageToBase64(file);
       brandingData.imageUrl = base64Image;
     }
-    if (!brandingData.imageUrl) {
+    if (!brandingData.imageUrl && file !== "removed") {
       const existingData = await getBrandingData(cfEnv);
       if (existingData?.imageUrl) {
         brandingData.imageUrl = existingData.imageUrl;

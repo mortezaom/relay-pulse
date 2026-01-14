@@ -37,6 +37,16 @@ export function BrandingForm({ data }: BrandingFormProps) {
 
   const [bLoading, setBLoading] = useState(false);
 
+  const [onceRemoved, setOnceRemoved] = useState(false);
+
+  const setFile = (file: File | "removed" | null) => {
+    if (file !== "removed") {
+      setSelectedFile(file);
+    } else {
+      setOnceRemoved(true);
+    }
+  };
+
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,6 +66,8 @@ export function BrandingForm({ data }: BrandingFormProps) {
       formData.append("alert", values.alertText);
       if (selectedFile) {
         formData.append("image", selectedFile);
+      } else if (onceRemoved && !selectedFile) {
+        formData.append("image", "removed");
       }
 
       const response = await fetch("/api/branding", {
@@ -120,7 +132,9 @@ export function BrandingForm({ data }: BrandingFormProps) {
             />
             <BrandingFileUpload
               currentImage={data?.imageUrl ?? null}
-              onFileChangeAction={(file: File | null) => setSelectedFile(file)}
+              onFileChangeAction={(file: File | "removed" | null) =>
+                setFile(file)
+              }
             />
           </div>
           <FormField
