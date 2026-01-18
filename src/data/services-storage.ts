@@ -1,11 +1,10 @@
 import { eq } from "drizzle-orm";
-import { getDb } from "@/db";
-import { services } from "@/db/schema";
+import { getDb } from "@/lib/db";
+import { services } from "../../packages/db/schema";
 import type { ServiceType } from "./services-data";
 
 export const getServiceList = async () => {
   const db = await getDb();
-  console.log(db);
   const allServices = await db.select().from(services);
   return allServices;
 };

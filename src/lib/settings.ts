@@ -297,9 +297,3 @@ export async function getAllServicesWithSettings(
     }));
   }
 }
-
-type CloudflareEnv = {
-  RELAY_PULSE_DB: D1Database;
-  RELAY_PULSE_KV: KVNamespace;
-  RELAY_PULSE_BUCKET: R2Bucket;
-};

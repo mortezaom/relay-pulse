@@ -1,19 +1,14 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "esnext",
+    "target": "ES2021",
+    "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["esnext"],
-    "types": ["../worker-configuration.d.ts"],
-    "noEmit": true,
-    "isolatedModules": true,
-    "skipLibCheck": true
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["@cloudflare/workers-types"],
+    "paths": {
+      "@repo/db": ["../packages/db/index.ts"]
+    }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.d.ts",
-    "../src/lib/**/*.ts",
-    "../src/db/**/*.ts"
-  ],
-  "exclude": ["node_modules", "../.next", "../.open-next"]
+  "include": ["src/**/*", "worker-configuration.d.ts"]
 }

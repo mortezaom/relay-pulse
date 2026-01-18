@@ -5,7 +5,7 @@ import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod/v4-mini";
+import { z } from "zod/v4";
 import { Button } from "@/components/ui/button";
 import {
   Form,

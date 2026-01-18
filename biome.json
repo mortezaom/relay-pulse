@@ -1,14 +1,23 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
+  "formatter": {
+    "formatWithErrors": true
+  },
   "assist": {
+    "enabled": true,
     "actions": {
       "source": {
+        "organizeImports": "on",
         "useSortedAttributes": "on"
       }
     }
   },
+  "vcs": {
+    "useIgnoreFile": false
+  },
   "linter": {
+    "enabled": true,
     "rules": {
       "complexity": {
         "noExcessiveCognitiveComplexity": {
@@ -25,6 +34,9 @@
             "max": 7
           }
         }
+      },
+      "style": {
+        "useConsistentTypeDefinitions": "off"
       }
     }
   }

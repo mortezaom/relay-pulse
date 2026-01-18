@@ -4,7 +4,11 @@
 
 import { and, desc, eq, gte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { incidents, monitoringResults, services } from "@/db/schema";
+import {
+  incidents,
+  monitoringResults,
+  services,
+} from "../../../packages/db/schema";
 export type ServiceStatus = {
   serviceId: number;
   status: "up" | "down" | "timeout" | "error";

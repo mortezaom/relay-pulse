@@ -1,9 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "relay-pulse",
-  "main": "worker/index.ts",
-  "compatibility_date": "2025-03-01",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-05-05",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "minify": true,
   "assets": {
     "binding": "ASSETS",
     "directory": ".open-next/assets"
@@ -11,20 +12,20 @@
   "observability": {
     "enabled": true
   },
-  "triggers": {
-    "crons": ["*/5 * * * *", "0 2 * * *"]
+  "placement": {
+    "mode": "smart"
   },
   "kv_namespaces": [
     {
       "binding": "RELAY_PULSE_KV",
-      "id": null
+      "id": "f574d593c06d42a59565500813564023"
     }
   ],
   "d1_databases": [
     {
       "binding": "RELAY_PULSE_DB",
       "database_name": "relay-pulse-db",
-      "database_id": null
+      "database_id": "e921c1e7-88fc-4d90-a6fc-39fa8a92f6b1"
     }
   ]
 }

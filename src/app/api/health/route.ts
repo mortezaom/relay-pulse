@@ -10,9 +10,8 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { desc } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getWorkerDb } from "@/db/index";
-import { monitoringResults, services } from "@/db/schema";
-import { isJwtSecretConfigured } from "@/lib/jwt-secret";
+import { getDb } from "@/lib/db";
+import { monitoringResults, services } from "../../../../packages/db/schema";
 
 export const runtime = "edge";
 
@@ -21,7 +20,7 @@ export async function GET(_: NextRequest) {
 
   try {
     // Test database connectivity
-    const db = getWorkerDb(env.RELAY_PULSE_DB);
+    const db = getDb();
 
     // Count total services
     const allServices = await db.select().from(services);
@@ -38,9 +37,6 @@ export async function GET(_: NextRequest) {
       .limit(1);
 
     const lastMonitoringCheck = recentResults[0]?.timestamp || null;
-
-    // Check JWT secret configuration
-    const jwtConfigured = await isJwtSecretConfigured();
 
     return Response.json({
       status: "healthy",
@@ -62,12 +58,6 @@ export async function GET(_: NextRequest) {
         database: "connected",
         kv: "connected",
         r2: "available",
-      },
-      security: {
-        jwtConfigured,
-        jwtWarning: jwtConfigured
-          ? undefined
-          : "Using auto-generated JWT secret. Set RELAY_JWT_SECRET for production.",
       },
     });
   } catch (error) {

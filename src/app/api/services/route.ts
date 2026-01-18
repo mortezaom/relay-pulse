@@ -6,8 +6,6 @@ import { getServiceList, saveService } from "@/data/services-storage";
 import { getServicesWithStatus } from "@/lib/monitoring/database";
 import { errorResponse, successResponse } from "@/lib/responses";
 
-export const runtime = "edge";
-
 export async function GET(_req: NextRequest) {
   try {
     const { env } = getCloudflareContext();

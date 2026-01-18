@@ -1,0 +1,19 @@
+{
+  "name": "cron-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "drizzle-orm": "^0.45.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260117.0",
+    "typescript": "^5",
+    "wrangler": "^4.58.0"
+  },
+  "packageManager": "pnpm@10.28.0"
+}

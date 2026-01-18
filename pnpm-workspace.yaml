@@ -5,3 +5,7 @@ onlyBuiltDependencies:
   - sharp
   - unrs-resolver
   - workerd
+
+packages:
+  - "packages/*"
+  - "worker"
