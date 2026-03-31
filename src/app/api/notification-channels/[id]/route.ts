@@ -5,6 +5,7 @@
  * DELETE /api/notification-channels/[id] - Delete channel
  */
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { credentialsSchema } from "@/data/notification-channels-data";
@@ -38,7 +39,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const env = process.env as unknown as CloudflareEnv;
+    const env = getCloudflareContext().env;
     const channel = await getChannel(id, env);
 
     if (!channel) {
@@ -90,7 +91,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const env = process.env as unknown as CloudflareEnv;
+    const env = getCloudflareContext().env;
     const existingChannel = await getChannel(id, env);
 
     if (!existingChannel) {
@@ -199,7 +200,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const env = process.env as unknown as CloudflareEnv;
+    const env = getCloudflareContext().env;
     const channel = await getChannel(id, env);
 
     if (!channel) {

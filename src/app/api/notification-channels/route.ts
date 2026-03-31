@@ -4,6 +4,7 @@
  * POST /api/notification-channels - Create a new channel
  */
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createChannelSchema } from "@/data/notification-channels-data";
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const env = process.env as unknown as CloudflareEnv;
+    const env = getCloudflareContext().env as CloudflareEnv;
     const channels = await getAllChannels(env);
 
     // Don't return encrypted credentials
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Save to KV
-    const env = process.env as unknown as CloudflareEnv;
+    const env = getCloudflareContext().env as CloudflareEnv;
     await saveChannel(channel, env);
 
     // Return without credentials

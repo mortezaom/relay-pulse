@@ -21,7 +21,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      data: { settings },
+      data: settings,
     });
   } catch (error) {
     console.error("Failed to get settings:", error);

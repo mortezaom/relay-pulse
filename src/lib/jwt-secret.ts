@@ -14,12 +14,6 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
  * Throws an error if not configured
  */
 export function getJwtSecret(): string {
-  // Try environment variable first (local development)
-  if (process.env.RELAY_JWT_SECRET) {
-    return process.env.RELAY_JWT_SECRET;
-  }
-
-  // Try Cloudflare environment (production secret)
   const { env } = getCloudflareContext();
 
   if (env.RELAY_JWT_SECRET) {

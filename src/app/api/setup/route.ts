@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const { email, password, secret } = body.data;
 
-    const { RELAY_AUTH_EMAIL, RELAY_AUTH_SECRET } = process.env;
+    const { RELAY_AUTH_EMAIL, RELAY_AUTH_SECRET } = cfEnv;
 
     if (email !== RELAY_AUTH_EMAIL || secret !== RELAY_AUTH_SECRET) {
       return errorResponse("Setup is not possible!", 401);

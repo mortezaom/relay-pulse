@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type SettingsFormProps = {
-  tcpCheckerUrl?: string;
-};
-
-export function SettingsForm({ tcpCheckerUrl: initialUrl }: SettingsFormProps) {
-  const [tcpCheckerUrl, setTcpCheckerUrl] = useState(initialUrl || "");
+export function SettingsForm() {
+  const [tcpCheckerUrl, setTcpCheckerUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const handleSave = async () => {
     setSaving(true);
@@ -93,12 +90,46 @@ export function SettingsForm({ tcpCheckerUrl: initialUrl }: SettingsFormProps) {
     }
   };
 
+  const loadTcpUrl = async () => {
+    try {
+      const response = await fetch("/api/settings", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const { data } = (await response.json()) as {
+        data: {
+          tcpCheckerUrl: string;
+        };
+      };
+
+      if (response.ok) {
+        setTcpCheckerUrl(data.tcpCheckerUrl);
+      } else {
+        throw new Error("Failed to load saved TCP Checker url!");
+      }
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      toast.error("Failed to load saved TCP Checker url!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: on-mount
+  useEffect(() => {
+    loadTcpUrl();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="tcpCheckerUrl">TCP Checker Service URL</Label>
           <Input
+            disabled={loading || saving}
             id="tcpCheckerUrl"
             onChange={(e) => setTcpCheckerUrl(e.target.value)}
             placeholder="https://your-tcp-checker.example.com/check"
@@ -159,13 +190,13 @@ export function SettingsForm({ tcpCheckerUrl: initialUrl }: SettingsFormProps) {
 
         <div className="flex gap-2">
           <Button
-            disabled={testing || saving || !tcpCheckerUrl}
+            disabled={loading || testing || saving || !tcpCheckerUrl}
             onClick={handleTest}
             variant="outline"
           >
             {testing ? "Testing..." : "Test Connection"}
           </Button>
-          <Button disabled={testing || saving} onClick={handleSave}>
+          <Button disabled={loading || testing || saving} onClick={handleSave}>
             {saving ? "Saving..." : "Save Settings"}
           </Button>
         </div>

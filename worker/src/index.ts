@@ -7,7 +7,6 @@ export default {
     ctx: ExecutionContext
   ) {
     console.log(controller.cron);
-    console.log(`${env.RELAY_PULSE_DB}`);
 
     const db = drizzle(env.RELAY_PULSE_DB);
 

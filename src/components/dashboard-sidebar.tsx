@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, LayoutDashboard } from "lucide-react";
+import { Bell, Cpu, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,12 @@ const navigationItems = [
     href: "/dashboard",
     icon: LayoutDashboard,
     description: "Overview & services",
+  },
+  {
+    title: "Services",
+    href: "/dashboard/services",
+    icon: Cpu,
+    description: "Manage services",
   },
   {
     title: "Notifications",
@@ -62,7 +68,7 @@ export function DashboardSidebar() {
               href={item.href}
               key={item.href}
             >
-              <Icon className="size-5 flex-shrink-0" />
+              <Icon className="size-5 shrink-0" />
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="font-medium text-sm">{item.title}</span>
                 {!isActive && (

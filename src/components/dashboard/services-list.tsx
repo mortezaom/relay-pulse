@@ -13,7 +13,6 @@ import {
   CardAction,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -121,7 +120,6 @@ export function ServicesList() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Services</CardTitle>
         <CardAction>
           <Button
             onClick={() => setServiceModal(true)}
@@ -136,7 +134,7 @@ export function ServicesList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">#</TableHead>
+              <TableHead className="w-25">#</TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="text-center">Type</TableHead>
               <TableHead className="text-center">Address</TableHead>
